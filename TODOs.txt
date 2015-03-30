@@ -1,0 +1,8 @@
+- Benchmark removing index shifts
+- Use consistent hashing algo for rehashing
+- Benchmark flattening the LLHS elementArrays with cur impl
+- Remove mod and divs on cache lookups by using upper and lower bits
+- Profile starting elementIndices as byte[], then short[]
+- Throw NPEs rather than checking parameters to add and remove
+- addIndexFor should perform an inplace rehash rather than making this a later call.
+- Combine indexOf loops for containsAll
