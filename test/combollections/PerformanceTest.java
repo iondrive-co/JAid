@@ -66,7 +66,7 @@ public class PerformanceTest {
         for (int j = 0; j < NUM_LOOPS_PER_RUN; j++) {
             toMeasure.setUp().run();
             long startTime = System.nanoTime();
-            //toMeasure.run().run();
+            toMeasure.run().run();
             long endTime = System.nanoTime();
             toMeasure.tearDown().run();
             // Write every result so no difference between warm up and actual, but discard writes from first half
