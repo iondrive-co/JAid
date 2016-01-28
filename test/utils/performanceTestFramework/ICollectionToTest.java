@@ -1,4 +1,4 @@
-package combollections.performanceTestFramework;
+package utils.performanceTestFramework;
 
 import java.util.Collection;
 

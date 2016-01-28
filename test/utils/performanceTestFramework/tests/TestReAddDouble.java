@@ -1,7 +1,7 @@
-package combollections.performanceTestFramework.tests;
+package utils.performanceTestFramework.tests;
 
-import combollections.performanceTestFramework.TestFunctions;
-import combollections.performanceTestFramework.TestObject;
+import utils.performanceTestFramework.TestFunctions;
+import utils.performanceTestFramework.TestObject;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,19 +1,7 @@
-Combinations or extensions of java collections.
+Implementations of some useful concepts for writing performant java code.
 
- - The java.util List and Set interfaces:
-   - Using an indexed unrolled linked list (LinkedArrayHashSet)
-   - (TODO) Using element hashcodes directly (ArraySet)
- - (TODO) A java.util List with CAS operations (fine grained locking on unrolled linked list) (ConcurrentLinkedList)
- - (TODO) A BigInteger sized list (list that can explicitly hold more than 2^31 items) (BigList)
- - (TODO) An ArrayList<Short> that uses short[] as an internal array (CompactPrimitiveArrayList)
+ - LinkedArrayHashSet - A data structure combining the java.util List and Set interfaces using an indexed unrolled linked list.
+ - ReversiblePerfectHash - Reversible String -> long function that does not require storage of the Strings.
+ - Geometric Random - An extremely fast generator of random numbers from a geometric series. Very useful when implementing a high performance CSL.
 
-The following microbenchmarks (from PerformanceTest.java with JDK6-x64 on an i7-3770 with 16GB RAM) are
-included to illustrate cases where a LinkedArrayHashSet may be useful:
-
-![Removing and Adding](data/RemoveAdd.png)
-
-![Iterating](data/Iterating.png)
-
-![containsAll from toArray](data/ContainsAllToArray.png)
-
-![Storage Overhead](data/Storage.png)
+Some benchmarking code and results are included, although are no replacement for running these in your own environment with a good microbenchmarking library like JMH.
