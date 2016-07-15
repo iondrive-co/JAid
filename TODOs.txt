@@ -1,3 +1,4 @@
+- Switch performance testing to JMH
 - Benchmark removing index shifts
 - Use consistent hashing algo for rehashing
 - Benchmark flattening the LLHS elementArrays with cur impl

@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Java Combollections.iml" filepath="$PROJECT_DIR$/.idea/Java Combollections.iml" />
-      <module fileurl="file://$PROJECT_DIR$/JavaUtils.iml" filepath="$PROJECT_DIR$/JavaUtils.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JAid.iml" filepath="$PROJECT_DIR$/JAid.iml" />
     </modules>
   </component>
 </project>
