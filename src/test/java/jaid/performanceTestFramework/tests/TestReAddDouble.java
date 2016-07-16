@@ -1,11 +1,11 @@
-package util.performanceTestFramework.tests;
+package jaid.performanceTestFramework.tests;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import util.performanceTestFramework.TestFunctions;
-import util.performanceTestFramework.TestObject;
+import jaid.performanceTestFramework.TestFunctions;
+import jaid.performanceTestFramework.TestObject;
 
 /**
  */

@@ -1,7 +1,7 @@
 /*
  * (c)
  */
-package util.collection;
+package jaid.collection;
 
 import java.util.*;
 

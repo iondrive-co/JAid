@@ -1,4 +1,4 @@
-package util;
+package jaid;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.hasItemInArray;
 import static org.hamcrest.Matchers.not;
 
 import junit.framework.TestCase;
-import util.collection.LinkedArrayHashSet;
+import jaid.collection.LinkedArrayHashSet;
 
 import org.junit.Before;
 import org.junit.Test;

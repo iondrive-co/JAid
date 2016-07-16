@@ -1,16 +1,16 @@
-package util;
+package jaid;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 
-import util.collection.LinkedArrayHashSet;
-import util.performanceTestFramework.ICollectionToTest;
-import util.performanceTestFramework.ResultSet;
-import util.performanceTestFramework.TestFunctions;
-import util.performanceTestFramework.TestObject;
-import util.performanceTestFramework.tests.TestContainsAllToArray;
-import util.performanceTestFramework.tests.TestIteration;
-import util.performanceTestFramework.tests.TestReAddDouble;
+import jaid.collection.LinkedArrayHashSet;
+import jaid.performanceTestFramework.ICollectionToTest;
+import jaid.performanceTestFramework.ResultSet;
+import jaid.performanceTestFramework.TestFunctions;
+import jaid.performanceTestFramework.TestObject;
+import jaid.performanceTestFramework.tests.TestContainsAllToArray;
+import jaid.performanceTestFramework.tests.TestIteration;
+import jaid.performanceTestFramework.tests.TestReAddDouble;
 
 /**
  * Runs a couple of simple synthetic tests.

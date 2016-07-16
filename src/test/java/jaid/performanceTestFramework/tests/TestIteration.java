@@ -1,7 +1,7 @@
-package util.performanceTestFramework.tests;
+package jaid.performanceTestFramework.tests;
 
-import util.performanceTestFramework.TestFunctions;
-import util.performanceTestFramework.TestObject;
+import jaid.performanceTestFramework.TestFunctions;
+import jaid.performanceTestFramework.TestObject;
 
 /**
  */

@@ -1,7 +1,7 @@
 /*
  * (c)
  */
-package util;
+package jaid;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 import org.junit.Test;
 
-import util.random.GeometricRandom;
+import jaid.random.GeometricRandom;
 
 /**
  * Unit test for {@link GeometricRandom}.

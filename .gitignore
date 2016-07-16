@@ -9,7 +9,6 @@
 *.ipr
 *.iws
 /out
-/.idea
 /.gradle
 /JavaUtils.iml
 
