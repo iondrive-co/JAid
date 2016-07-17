@@ -3,6 +3,8 @@
  */
 package jaid.collection;
 
+import static java.util.Collections.emptyList;
+
 import java.util.*;
 
 /**
@@ -675,7 +677,7 @@ public class LinkedArrayHashSet<T> implements Set<T>, List<T> {
             throw new IndexOutOfBoundsException();
         }
         if (fromIndexInclusive == toIndexExclusive) {
-            return Collections.emptyList();
+            return emptyList();
         }
         return new SubList(fromIndexInclusive, toIndexExclusive - 1, 0, numItemsStored);
     }
@@ -924,7 +926,7 @@ public class LinkedArrayHashSet<T> implements Set<T>, List<T> {
                 throw new IndexOutOfBoundsException();
             }
             if (fromIndexInclusive == toIndexExclusive) {
-                return Collections.emptyList();
+                return emptyList();
             }
             return new SubList(startIdx + fromIndexInclusive, startIdx + toIndexExclusive - 1, startIdx, endIdx);
         }  
