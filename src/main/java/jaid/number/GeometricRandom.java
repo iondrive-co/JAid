@@ -1,7 +1,7 @@
 /*
  * (c)
  */
-package jaid.random;
+package jaid.number;
 
 import java.security.SecureRandom;
 import java.util.Random;

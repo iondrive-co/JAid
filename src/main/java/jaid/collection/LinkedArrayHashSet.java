@@ -54,7 +54,7 @@ public class LinkedArrayHashSet<T> implements Set<T>, List<T> {
      * Storage of all elements in this collection. Inner arrays are allocated in ALLOCATION_SIZE chunks
      * when required, up until SEGMENT_SIZE at which point a new outer array is created.
      * This design is conservative on allocating memory while keeping object references grouped in the
-     * same cache line (content chasing can still occur for hash functions).
+     * same cache line (content chasing can still occur for hash function).
      * The content is always stored contiguously from index 0 to index numItemsStored - 1.
      */
     private Object[][] elementArrays;

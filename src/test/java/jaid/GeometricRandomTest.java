@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 import org.junit.Test;
 
-import jaid.random.GeometricRandom;
+import jaid.number.GeometricRandom;
 
 /**
  * Unit test for {@link GeometricRandom}.

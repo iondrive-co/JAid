@@ -8,7 +8,7 @@ import static jaid.collection.IntSkipList.Constants.MAX_LEVEL;
 import static jaid.collection.IntSkipList.Constants.NO_POSITION;
 import static jaid.collection.IntSkipList.Constants.SEGMENT_SIZE;
 
-import jaid.random.GeometricRandom;
+import jaid.number.GeometricRandom;
 
 /**
  * Non threadsafe array backed skip list that handles up to around {@link java.lang.Integer#MAX_VALUE} entries.

@@ -32,7 +32,7 @@ public class LinkedArrayHashSetPerformanceTest {
                 testFns.init(toTest, testData);
                 Set<TestFunctions> existing = testNameToFns.get(testFns.toString());
                 if (existing == null) {
-                    // Store test functions in the order defined in typesToTest
+                    // Store test function in the order defined in typesToTest
                     existing = new LinkedHashSet<TestFunctions>();
                     testNameToFns.put(testFns.toString(), existing);
                 }
