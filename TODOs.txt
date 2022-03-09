@@ -7,3 +7,4 @@
 - Throw NPEs rather than checking parameters to add and remove
 - addIndexFor should perform an inplace rehash rather than making this a later call.
 - Combine indexOf loops for containsAll
+- Github action to run tests on push
