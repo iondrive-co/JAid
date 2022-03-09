@@ -1,14 +1,4 @@
-### Intellij ###
-*.iml
+/.gradle/
+/.idea/
+/build/
 /out/
-
-## Directory-based project format:
-.idea/
-
-## File-based project format:
-*.ipr
-*.iws
-/out
-/.gradle
-/JavaUtils.iml
-
