@@ -1,84 +1,74 @@
 package jaid;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItemInArray;
-import static org.hamcrest.Matchers.not;
-
-import junit.framework.TestCase;
 import jaid.collection.LinkedArrayHashSet;
-
+import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.*;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit test of {@link LinkedArrayHashSet}
  */
 @RunWith(JUnit4.class)
 public class LinkedArrayHashSetTest extends TestCase {
 
-    LinkedArrayHashSet linkedArrayHashSet;
+    LinkedArrayHashSet<Object> linkedArrayHashSet;
     List<Object> allTestElements;
-    static final Object O1 = newObjectNamed("O1");
-    static final Object O2 = newObjectNamed("O2");
-    static final Object O3 = newObjectNamed("O3");
-    static final Object O4 = newObjectNamed("O4");
+    static final NamedObject O1 = new NamedObject("O1");
+    static final NamedObject O2 = new NamedObject("O2");
+    static final NamedObject O3 = new NamedObject("O3");
+    static final NamedObject O4 = new NamedObject("O4");
 
     @Before
     public void initObjects() {
-        linkedArrayHashSet = new LinkedArrayHashSet();
-        allTestElements = new ArrayList<Object>(){{add(O1); add(O2);add(O3); add(O4);}};
-    }
-
-    private static Object newObjectNamed(final String name) {
-        return new Object() {
-            @Override
-            public String toString() {
-                return name;
-            }
-        };
+        linkedArrayHashSet = new LinkedArrayHashSet<>();
+        allTestElements = new ArrayList<>(){{add(O1); add(O2);add(O3); add(O4);}};
     }
 
     @Test
     public void addElement() {
         checkSizeIs(0);
-        assertThat(linkedArrayHashSet.add(O1), is(true));
+        assertThat(linkedArrayHashSet.add(O1)).isTrue();
         checkSizeIs(1);
         checkOnlyElementContainedAt(0, O1);
     }
 
     @Test
     public void addElements() {
-        assertThat(linkedArrayHashSet.add(O1), is(true));
-        assertThat(linkedArrayHashSet.add(O2), is(true));
+        assertThat(linkedArrayHashSet.add(O1)).isTrue();
+        assertThat(linkedArrayHashSet.add(O2)).isTrue();
         checkSizeIs(2);
         checkElementsOnlyContainedAt(rangeClosedOpen(0, 2));
     }
 
     @Test
     public void addManyElements() {
-        final Collection<Object> zeroToShortMax = (Collection)rangeClosedOpen(0, Short.MAX_VALUE);
-        for (Object i: zeroToShortMax) {
-            assertThat(linkedArrayHashSet.add(i), is(true));
+        final List<Integer> zeroToShortMax = rangeClosedOpen(0, 16384);
+        for (final Integer i: zeroToShortMax) {
+            assertThat(linkedArrayHashSet.add(i)).isTrue();
+            assertThat(linkedArrayHashSet.get(i)).isEqualTo(i);
         }
-        checkSizeIs(Short.MAX_VALUE);
-        // TODO contained at?
+        checkSizeIs(16384);
         checkElementsContained(zeroToShortMax);
     }
 
     @Test
     public void addAllElements() {
-        assertThat(linkedArrayHashSet.addAll(allTestElements), is(true));
+        assertThat(linkedArrayHashSet.addAll(allTestElements)).isTrue();
         checkSizeIs(allTestElements.size());
         checkElementsOnlyContainedAt(rangeClosedOpen(0, allTestElements.size()));
     }
 
     @Test
     public void addElementAt() {
-        assertThat(linkedArrayHashSet.add(O1), is(true));
+        assertThat(linkedArrayHashSet.add(O1)).isTrue();
         linkedArrayHashSet.add(1, O2);
         checkSizeIs(2);
         checkElementsOnlyContainedAt(rangeClosedOpen(0, 2));
@@ -92,9 +82,9 @@ public class LinkedArrayHashSetTest extends TestCase {
         checkElementContainedAt(0, O4);
 
         try {
-            linkedArrayHashSet.add(5, new Object());
+            linkedArrayHashSet.add(5, new NamedObject("5"));
             fail("Should have thrown an Exception");
-        } catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException ignored) {
         }
     }
 
@@ -103,7 +93,7 @@ public class LinkedArrayHashSetTest extends TestCase {
         try {
             linkedArrayHashSet.set(0, O1);
             fail("Should have thrown an Exception");
-        } catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException ignored) {
         }
         linkedArrayHashSet.add(O1);
         linkedArrayHashSet.set(0, O2);
@@ -130,10 +120,10 @@ public class LinkedArrayHashSetTest extends TestCase {
     @Test
     public void removeElement() {
         linkedArrayHashSet.add(O1);
-        assertThat(linkedArrayHashSet.remove(O1), is(true));
+        assertThat(linkedArrayHashSet.remove(O1)).isTrue();
         checkSizeIs(0);
         checkElementsNotContained(O1);
-        assertThat(linkedArrayHashSet.remove(O1), is(false));
+        assertThat(linkedArrayHashSet.remove(O1)).isFalse();
     }
 
     @Test
@@ -155,7 +145,7 @@ public class LinkedArrayHashSetTest extends TestCase {
         linkedArrayHashSet.remove(O3);
         checkSizeIs(1);
         checkElementsNotContained(O3);
-        checkElementsContained(Arrays.asList(O4));
+        checkElementsContained(List.of(O4));
 
         linkedArrayHashSet.remove(O4);
         checkSizeIs(0);
@@ -164,29 +154,31 @@ public class LinkedArrayHashSetTest extends TestCase {
 
     @Test
     public void removeFromManyElements() {
-        final Collection<Object> zeroTo41 = (Collection)rangeClosedOpen(0, 42);
-        final Collection<Object> fourtyThreeToShortMax = (Collection)rangeClosedOpen(43, Short.MAX_VALUE + 1);
-        Collection<Object> zeroToShortMax = new ArrayList(Short.MAX_VALUE) {{
-            addAll(zeroTo41);
-            add(42);
-            addAll(fourtyThreeToShortMax);
-        }};
-        for (Object i: zeroToShortMax) {
-            assertThat(linkedArrayHashSet.add(i), is(true));
+        final List<Integer> zeroTo41 = rangeClosedOpen(0, 42);
+        for (final Object i: zeroTo41) {
+            assertThat(linkedArrayHashSet.add(i)).isTrue();
+        }
+        assertThat(linkedArrayHashSet.add(42)).isTrue();
+        final List<Integer> fortyThreeToLargeNum = rangeClosedOpen(43, 8192 + 1);
+        for (final Object i: fortyThreeToLargeNum) {
+            assertThat(linkedArrayHashSet.add(i)).isTrue();
         }
 
-        checkElementsContained(zeroToShortMax);
-        linkedArrayHashSet.remove(42);
         checkElementsContained(zeroTo41);
-        checkElementsContained(fourtyThreeToShortMax);
+        checkElementsContained(List.of(42));
+        checkElementsContained(fortyThreeToLargeNum);
+        checkSizeIs(8192 + 1);
+        linkedArrayHashSet.remove(42);
+        checkSizeIs(8192);
+        checkElementsContained(zeroTo41);
         checkElementsNotContained(42);
-        checkSizeIs(Short.MAX_VALUE );
+        checkElementsContained(fortyThreeToLargeNum);
     }
 
     @Test
     public void removeAllElements() {
         linkedArrayHashSet.addAll(Arrays.asList(O1, O2, O3, O4));
-        linkedArrayHashSet.removeAll(Arrays.asList(O3));
+        linkedArrayHashSet.removeAll(List.of(O3));
         checkSizeIs(3);
         checkElementsNotContained(O3);
         linkedArrayHashSet.removeAll(Arrays.asList(O2, O4));
@@ -209,7 +201,7 @@ public class LinkedArrayHashSetTest extends TestCase {
         checkElementsNotContained(subList, O3, O4);
         checkElementContainedAt(0, O1, subList);
         checkElementContainedAt(1, O2, subList);
-    //--- Sublists behaviour is undefined when the backing list is structurally
+        //Sublists behaviour is undefined when the backing list is structurally
         // modified, but still need to check some basics of our implementation
         // Additions do not affect the sublist
         linkedArrayHashSet.add(O4);
@@ -226,8 +218,7 @@ public class LinkedArrayHashSetTest extends TestCase {
         // Removals inside the range can affect the sublist, check it
         // still has the 02 element in it even if its size is wrong
         linkedArrayHashSet.remove(O1);
-        checkElementsContained(Arrays.asList(O2), subList);
-    //---
+        checkElementsContained(List.of(O2), subList);
     }
 
     @Test
@@ -238,7 +229,7 @@ public class LinkedArrayHashSetTest extends TestCase {
         checkElementsNotContained(subList, O1, O4);
         checkElementContainedAt(0, O2, subList);
         checkElementContainedAt(1, O3, subList);
-    //--- Sublists behvaiour is undefined when the backing list is structurally
+        // Sublists behvaiour is undefined when the backing list is structurally
         // modified, but still need to check some basics of our implementation
         // Additions do not affect the sublist
         linkedArrayHashSet.add(O4);
@@ -249,99 +240,97 @@ public class LinkedArrayHashSetTest extends TestCase {
         // Removals inside the range can affect the sublist, check it
         // still has the 02 element in it even if its size is wrong
         linkedArrayHashSet.remove(O2);
-        checkElementsContained(Arrays.asList(O3), subList);
-    //---
+        checkElementsContained(List.of(O3), subList);
     }
 
     @Test
     public void invalidSublist() {
-
+      // TODO
     }
 
-    private void checkSizeIs(int expectedSize) {
+    private void checkSizeIs(final int expectedSize) {
         checkSizeIs(expectedSize, linkedArrayHashSet);
     }
-    private void checkSizeIs(int expectedSize, List<Object> toTest) {
-        assertThat(toTest.isEmpty(), is(expectedSize <= 0));
-        assertThat(toTest.size(), is(expectedSize));
-        assertThat(toTest.toArray().length, is(expectedSize));
-        assertThat(toTest.iterator().hasNext(), is(expectedSize > 0));
-        assertThat(toTest.listIterator().hasNext(), is(expectedSize > 0));
-        assertThat(toTest.listIterator(expectedSize).hasNext(), is(false));
-        assertThat(toTest.subList(0, expectedSize).isEmpty(), is(expectedSize <= 0));
-        assertThat(toTest.subList(0, expectedSize).size(), is(expectedSize));
+    private void checkSizeIs(final int expectedSize, final List<Object> toTest) {
+        assertThat(toTest.isEmpty()).isEqualTo(expectedSize <= 0);
+        assertThat(toTest).hasSize(expectedSize);
+        assertThat(toTest.toArray()).hasSize(expectedSize);
+        assertThat(toTest.iterator().hasNext()).isEqualTo((expectedSize > 0));
+        assertThat(toTest.listIterator().hasNext()).isEqualTo(expectedSize > 0);
+        assertThat(toTest.listIterator(expectedSize).hasNext()).isFalse();
+        assertThat(toTest.subList(0, expectedSize).isEmpty()).isEqualTo(expectedSize <= 0);
+        assertThat(toTest.subList(0, expectedSize)).hasSize(expectedSize);
     }
 
-    private void checkElementContainedAt(int expectedPosition, Object element) {
+    private void checkElementContainedAt(final int expectedPosition, final Object element) {
         checkElementContainedAt(expectedPosition, element, linkedArrayHashSet);
     }
 
-    private void checkElementContainedAt(int expectedPosition, Object element, List<Object> target) {
+    private void checkElementContainedAt(final int expectedPosition, final Object element, final List<Object> target) {
         checkElementsContained(Collections.singletonList(element), target);
-        assertThat(target.get(expectedPosition), is(element));
-        assertThat(target.indexOf(element), is(expectedPosition));
-        assertThat(target.lastIndexOf(element), is(expectedPosition));
-        assertThat(target.toArray()[expectedPosition], is(element));
-        assertThat(target.subList(expectedPosition, expectedPosition + 1).get(0), is(element));
+        assertThat(target.get(expectedPosition)).isEqualTo(element);
+        assertThat(target.indexOf(element)).isEqualTo(expectedPosition);
+        assertThat(target.lastIndexOf(element)).isEqualTo(expectedPosition);
+        assertThat(target.toArray()[expectedPosition]).isEqualTo(element);
+        assertThat(target.subList(expectedPosition, expectedPosition + 1).get(0)).isEqualTo(element);
     }
 
-    private void checkOnlyElementContainedAt(int expectedPosition, Object element) {
+    private void checkOnlyElementContainedAt(final int expectedPosition, final Object element) {
         checkOnlyElementContainedAt(expectedPosition, element, linkedArrayHashSet);
     }
 
-    private void checkOnlyElementContainedAt(int expectedPosition, Object element, List<Object> target) {
+    private void checkOnlyElementContainedAt(final int expectedPosition, final Object element, final List<Object> target) {
         checkElementContainedAt(expectedPosition, element, target);
-        for (Object item: target) {
-            assertThat("Returned " + item + " which was not " + element, item, is(element));
+        for (final Object item: target) {
+            assertThat(item).isEqualTo(element);
         }
     }
 
-    private void checkElementsOnlyContainedAt(List<Integer> expectedPositions) {
-        Collection<Object> containedElements = new ArrayList<Object>(linkedArrayHashSet.size());
-        for (Integer expectedPosition: expectedPositions) {
+    private void checkElementsOnlyContainedAt(final List<Integer> expectedPositions) {
+        final Collection<Object> containedElements = new ArrayList<>(linkedArrayHashSet.size());
+        for (final Integer expectedPosition: expectedPositions) {
             Object containedElement = allTestElements.get(expectedPosition);
             checkElementContainedAt(expectedPosition, containedElement);
             containedElements.add(containedElement);
         }
-        for (Object item: linkedArrayHashSet) {
-            assertThat("Returned " + item + " which was not contained in " + containedElements, containedElements.contains(item), is(true));
+        for (final Object item: linkedArrayHashSet) {
+            assertThat(containedElements).contains(item);
         }
     }
 
-    private void checkElementsContained(Collection<Object> elements) {
+    private void checkElementsContained(final Collection<?> elements) {
         checkElementsContained(elements, linkedArrayHashSet);
     }
 
-    private void checkElementsContained(Collection<Object> elements, List<Object> target) {
-        for (Object element: elements) {
-            assertThat("Wrong result for contains(" + element + ")", target.contains(element), is(true));
-            assertThat("toArray() missing " + element, target.toArray(), hasItemInArray(element));
-            assertThat("toArray() missing " + element, target.toArray(new Object[target.size()]), hasItemInArray(element));
-            assertThat("subList missing " + element,target.subList(0, target.size()).contains(element), is(true));
+    private void checkElementsContained(final Collection<?> elements, final List<Object> target) {
+        for (final Object element: elements) {
+            assertThat(target.contains(element)).as(element.toString()).isTrue();
+            assertThat(target.toArray()).contains(element);
+            assertThat(target.toArray(new Object[0])).contains(element);
+            assertThat(target.subList(0, target.size()).contains(element)).isTrue();
         }
-        assertThat(target.containsAll(elements), is(true));
-        assertThat(target.subList(0, target.size()).containsAll(elements), is(true));
+        assertThat(target.containsAll(elements)).isTrue();
+        assertThat(target.subList(0, target.size()).containsAll(elements)).isTrue();
     }
 
-    private void checkElementsNotContained(Object... elemItems) {
+    private void checkElementsNotContained(final Object... elemItems) {
         checkElementsNotContained(linkedArrayHashSet, elemItems);
     }
 
-    private void checkElementsNotContained(List<Object> target, Object... elemItems) {
-        Collection<Object> elements = Arrays.asList(elemItems);
-        for (Object element: elements) {
-            assertThat("Wrong result for contains(" + element + ")", target.contains(element), is(false));
-            assertThat("toArray() missing " + element, target.toArray(), not(hasItemInArray(element)));
-            assertThat("subList missing " + element,target.subList(0, target.size()).contains(element), is(false));
+    private void checkElementsNotContained(final List<Object> target, final Object... elemItems) {
+        final Collection<Object> elements = Arrays.asList(elemItems);
+        for (final Object element: elements) {
+            assertThat(target.contains(element)).isFalse();
+            assertThat(target).doesNotContain(element);
+            assertThat(target.toArray()).doesNotContain(element);
+            assertThat(target.subList(0, target.size()).contains(element)).isFalse();
         }
-        assertThat(target.containsAll(elements), is(false));
-        assertThat(target.subList(0, target.size()).containsAll(elements), is(false));
+        assertThat(target.containsAll(elements)).isFalse();
+        assertThat(target.subList(0, target.size()).containsAll(elements)).isFalse();
     }
 
     // Includes begin, does not include end
-    private List<Integer> rangeClosedOpen(int begin, int end) {
-        List<Integer> ret = new ArrayList<Integer>((end - begin) + 1);
-        for(int i = begin; i < end; ret.add(i++));
-        return ret;
+    private List<Integer> rangeClosedOpen(final int begin, final int end) {
+        return IntStream.range(begin, end).boxed().collect(toList());
     }
 }
