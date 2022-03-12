@@ -1,3 +1,4 @@
+- Fix bug in removeNullsFrom when size is > 4094 elements
 - Switch performance testing to JMH
 - Benchmark removing index shifts
 - Use consistent hashing algo for rehashing

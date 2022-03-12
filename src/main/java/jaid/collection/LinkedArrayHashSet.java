@@ -3,9 +3,9 @@
  */
 package jaid.collection;
 
-import static java.util.Collections.emptyList;
-
 import java.util.*;
+
+import static java.util.Collections.emptyList;
 
 /**
  * An unrolled linked list that maintains an index of its elements. This can be used as either a set or a list, for
@@ -76,14 +76,14 @@ public class LinkedArrayHashSet<T> implements Set<T>, List<T> {
 
     /**
      * Stores the position of every item in elementArrays in an inner array location uniquely determined by
-     * the last n (where 2^n is the inner array size) bits of a integer generated from the items hashCode
+     * the last n (where 2^n is the inner array size) bits of an integer generated from the items hashCode
      * method (run through another deterministic function to ensure lower order bits are as well distributed
      * as high order bits). When a collision occurs on a store, rather than chaining or open addressing, a
      * higher level array is used, with each higher level being twice the size of the last. This reduces
      * the worst case of put compared to a list as there is less chance of a rehash, at the cost of extra
      * work computing the indexes when modifying. Rehashes still occur as to limit the number of arrays to
      * search and keep related data in cache the total number of outer arrays is limited, when the limit is
-     * reached a rehash of the smallest into the second smallest array occurs. Uses int rather than Integer
+     * reached a rehash of the smallest into the second-smallest array occurs. Uses int rather than Integer
      * as this will be more compact for large arrays after the disadvantage of not being able to re-use the
      * Integers in the auto-box cache.
      */
@@ -155,7 +155,7 @@ public class LinkedArrayHashSet<T> implements Set<T>, List<T> {
 
     /**
      * Sets the specified object to null and updates its index, but does not fill the null space.
-     * This is O(1).
+     * This is 0(1) since elementIndices can't be larger than MAX_NUM_INDEX_ARRAYS
      *
      * @param toRemove element to remove from collection
      * @return the position that the element was removed from.
@@ -200,7 +200,7 @@ public class LinkedArrayHashSet<T> implements Set<T>, List<T> {
         int fillFromOuter = fillFromInner / SEGMENT_SIZE;
         int curNumNullFills = 1;
         // Iterate from starting point copying each non-null item back to fill the last fillToIndex
-        while (fillFromOuter <= finalPosOuter && fillFromInner <= finalPosInner) {
+        while (fillFromOuter < finalPosOuter || fillFromInner <= finalPosInner) {
             Object curItem = elementArrays[fillFromOuter][fillFromInner];
             if (curItem != null) {
                 // Shift the item backwards by curNumNullFills in the elementArrays
