@@ -154,12 +154,13 @@ public class LinkedArrayHashSetTest extends TestCase {
 
     @Test
     public void removeFromManyElements() {
+        final int size = 4094;
         final List<Integer> zeroTo41 = rangeClosedOpen(0, 42);
         for (final Object i: zeroTo41) {
             assertThat(linkedArrayHashSet.add(i)).isTrue();
         }
         assertThat(linkedArrayHashSet.add(42)).isTrue();
-        final List<Integer> fortyThreeToLargeNum = rangeClosedOpen(43, 8192 + 1);
+        final List<Integer> fortyThreeToLargeNum = rangeClosedOpen(43, size + 1);
         for (final Object i: fortyThreeToLargeNum) {
             assertThat(linkedArrayHashSet.add(i)).isTrue();
         }
@@ -167,9 +168,9 @@ public class LinkedArrayHashSetTest extends TestCase {
         checkElementsContained(zeroTo41);
         checkElementsContained(List.of(42));
         checkElementsContained(fortyThreeToLargeNum);
-        checkSizeIs(8192 + 1);
-        linkedArrayHashSet.remove(42);
-        checkSizeIs(8192);
+        checkSizeIs(size + 1);
+        assertThat(linkedArrayHashSet.remove(42)).isEqualTo(42);
+        checkSizeIs(size);
         checkElementsContained(zeroTo41);
         checkElementsNotContained(42);
         checkElementsContained(fortyThreeToLargeNum);
