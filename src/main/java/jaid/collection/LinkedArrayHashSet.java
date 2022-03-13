@@ -200,7 +200,7 @@ public class LinkedArrayHashSet<T> implements Set<T>, List<T> {
         int fillFromOuter = fillFromInner / SEGMENT_SIZE;
         int curNumNullFills = 1;
         // Iterate from starting point copying each non-null item back to fill the last fillToIndex
-        while (fillFromOuter < finalPosOuter || fillFromInner <= finalPosInner) {
+        while (fillFromOuter < finalPosOuter || (fillFromOuter == finalPosOuter && fillFromInner <= finalPosInner)) {
             Object curItem = elementArrays[fillFromOuter][fillFromInner];
             if (curItem != null) {
                 // Shift the item backwards by curNumNullFills in the elementArrays

@@ -154,26 +154,30 @@ public class LinkedArrayHashSetTest extends TestCase {
 
     @Test
     public void removeFromManyElements() {
-        final int size = 4094;
-        final List<Integer> zeroTo41 = rangeClosedOpen(0, 42);
-        for (final Object i: zeroTo41) {
-            assertThat(linkedArrayHashSet.add(i)).isTrue();
-        }
-        assertThat(linkedArrayHashSet.add(42)).isTrue();
-        final List<Integer> fortyThreeToLargeNum = rangeClosedOpen(43, size + 1);
-        for (final Object i: fortyThreeToLargeNum) {
-            assertThat(linkedArrayHashSet.add(i)).isTrue();
-        }
+        final int[] testSizes = new int[]{256, 4095, 4138};
+        for (final int size: testSizes) {
+            System.out.println("Testing " + size);
+            final List<Integer> zeroTo41 = rangeClosedOpen(0, 42);
+            for (final Object i: zeroTo41) {
+                assertThat(linkedArrayHashSet.add(i)).isTrue();
+            }
+            assertThat(linkedArrayHashSet.add(42)).isTrue();
+            final List<Integer> fortyThreeToSize = rangeClosedOpen(43, size + 1);
+            for (final Object i: fortyThreeToSize) {
+                assertThat(linkedArrayHashSet.add(i)).isTrue();
+            }
 
-        checkElementsContained(zeroTo41);
-        checkElementsContained(List.of(42));
-        checkElementsContained(fortyThreeToLargeNum);
-        checkSizeIs(size + 1);
-        assertThat(linkedArrayHashSet.remove(42)).isEqualTo(42);
-        checkSizeIs(size);
-        checkElementsContained(zeroTo41);
-        checkElementsNotContained(42);
-        checkElementsContained(fortyThreeToLargeNum);
+            checkElementsContained(zeroTo41);
+            checkElementsContained(List.of(42));
+            checkElementsContained(fortyThreeToSize);
+            checkSizeIs(size + 1);
+            assertThat(linkedArrayHashSet.remove(42)).isEqualTo(42);
+            checkSizeIs(size);
+            checkElementsContained(zeroTo41);
+            checkElementsNotContained(42);
+            checkElementsContained(fortyThreeToSize);
+            linkedArrayHashSet.clear();
+        }
     }
 
     @Test
