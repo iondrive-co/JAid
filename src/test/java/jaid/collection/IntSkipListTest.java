@@ -77,4 +77,23 @@ public class IntSkipListTest {
         assertEquals(Integer.valueOf(5), list.ceiling(5));
         assertEquals(Integer.valueOf(7), list.higher(5));
     }
+
+    @Test
+    public void testLargeList() {
+        final IntSkipList list = new IntSkipList();
+        for (int i = 0; i < 1_000_000; i++) {
+            list.add(i);
+        }
+        assertThat(list.size()).isEqualTo(1_000_000);
+        assertThat(list.pollLast()).isEqualTo(999_999);
+        assertThat(list.pollFirst()).isEqualTo(0);
+        assertThat(list.size()).isEqualTo(999_998);
+        for (int i = 0; i < 1_000_000; i++) {
+            if (i % 2 == 0) {
+                list.remove(i);
+            }
+        }
+        assertThat(list.size()).isEqualTo(499_999);
+        assertThat(list.pollFirst()).isEqualTo(1);
+    }
 }
