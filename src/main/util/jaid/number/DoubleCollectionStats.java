@@ -1,40 +1,39 @@
 package jaid.number;
 
 import com.google.common.base.Preconditions;
-import it.unimi.dsi.fastutil.floats.FloatIterator;
-import it.unimi.dsi.fastutil.floats.FloatList;
-import jaid.collection.FloatArrayIterator;
+import it.unimi.dsi.fastutil.doubles.DoubleIterator;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
+import jaid.collection.Collections;
+import jaid.collection.DoubleArrayIterator;
 
 import java.util.Arrays;
 import java.util.function.DoublePredicate;
 
-import static jaid.collection.Collections.extract;
-
 /**
  */
-public class FloatCollectionStats implements CollectionStats {
+public final class DoubleCollectionStats implements CollectionStats {
 
     private static final DoublePredicate POSITIVE_CHECK = d -> d >= 0;
     private final int numElements;
-    private float[] array;
-    private FloatList collection;
-    private FloatIterator iterator;
+    private double[] array;
+    private DoubleList collection;
+    private DoubleIterator iterator;
     // On demand
-    private float[] sorted;
-    private float[] positiveSorted;
+    private double[] sorted;
+    private double[] positiveSorted;
     private double mean = Double.NaN;
     private double stdDev= Double.NaN;
     private double max = Double.NaN;
     private double min= Double.NaN;
 
-    public FloatCollectionStats(final float[] array) {
+    public DoubleCollectionStats(final double[] array) {
         this.numElements = array.length;
         Preconditions.checkArgument(numElements > 0);
         this.array = array;
         recreateIterator();
     }
 
-    public FloatCollectionStats(final FloatList collection) {
+    public DoubleCollectionStats(final DoubleList collection) {
         this.numElements = collection.size();
         Preconditions.checkArgument(numElements > 0);
         this.collection = collection;
@@ -42,12 +41,12 @@ public class FloatCollectionStats implements CollectionStats {
     }
 
     private void recreateIterator() {
-        iterator = array == null ? collection.iterator() : new FloatArrayIterator(array);
+        iterator = array == null ? collection.iterator() : new DoubleArrayIterator(array);
     }
 
-    private float[] getSorted() {
+    private double[] getSorted() {
         if (sorted == null) {
-            sorted = extract(iterator, numElements);
+            sorted = Collections.extract(iterator, numElements);
             Arrays.sort(sorted);
             recreateIterator();
         }
@@ -56,7 +55,7 @@ public class FloatCollectionStats implements CollectionStats {
 
     @Override
     public double getValue(int position) {
-        return array == null ? collection.getFloat(position) : array[position];
+        return array == null ? collection.getDouble(position) : array[position];
     }
 
     @Override
@@ -66,7 +65,7 @@ public class FloatCollectionStats implements CollectionStats {
 
     @Override
     public void fillQuantiles(double[] quantiles) {
-        final float[] sorted = getSorted();
+        final double[] sorted = getSorted();
         final float numQuantiles = quantiles.length;
         final int partitionIdx = (int)Math.floor(sorted.length / (numQuantiles + 1));
         for (int i = 0; i < numQuantiles; i++) {
@@ -75,10 +74,10 @@ public class FloatCollectionStats implements CollectionStats {
         }
     }
 
-    private float[] getPositiveSorted() {
+    private double[] getPositiveSorted() {
         if (positiveSorted == null) {
-            final FloatList collectionCopy = extract(iterator, POSITIVE_CHECK);
-            positiveSorted = collectionCopy.toFloatArray();
+            final DoubleList collectionCopy = Collections.extract(iterator, POSITIVE_CHECK);
+            positiveSorted = collectionCopy.toDoubleArray();
             Arrays.sort(positiveSorted);
             recreateIterator();
         }
@@ -87,7 +86,7 @@ public class FloatCollectionStats implements CollectionStats {
 
     @Override
     public void fillPositiveQuantiles(double[] quantiles) {
-        final float[] positiveSorted = getPositiveSorted();
+        final double[] positiveSorted = getPositiveSorted();
         final float numQuantiles = quantiles.length;
         final int partitionIdx = (int)Math.floor(positiveSorted.length / (numQuantiles + 1));
         for (int i = 0; i < numQuantiles; i++) {
@@ -101,7 +100,7 @@ public class FloatCollectionStats implements CollectionStats {
         if (Double.isNaN(mean)) {
             mean = 0;
             int t = 1;
-            for (float value = iterator.nextFloat(); iterator.hasNext(); value = iterator.nextFloat()) {
+            for (double value = iterator.nextDouble(); iterator.hasNext(); value = iterator.nextDouble()) {
                 mean += (value - mean) / t;
                 ++t;
             }
@@ -117,7 +116,7 @@ public class FloatCollectionStats implements CollectionStats {
             double mean = 0;
             double sum = 0;
             int tally = 1;
-            for (float value = iterator.nextFloat(); iterator.hasNext(); value = iterator.nextFloat()) {
+            for (double value = iterator.nextDouble(); iterator.hasNext(); value = iterator.nextDouble()) {
                 double oldMean = mean;
                 mean = mean + ((value - mean) / tally++);
                 sum = sum + ((value - mean) * (value - oldMean));
@@ -137,7 +136,7 @@ public class FloatCollectionStats implements CollectionStats {
     public double max() {
         if (Double.isNaN(max)) {
             max = -Double.MAX_VALUE;
-            for (float value = iterator.nextFloat(); iterator.hasNext(); value = iterator.nextFloat()) {
+            for (double value = iterator.nextDouble(); iterator.hasNext(); value = iterator.nextDouble()) {
                 max = Math.max(max, value);
             }
             recreateIterator();
@@ -150,7 +149,7 @@ public class FloatCollectionStats implements CollectionStats {
     public double min() {
         if (Double.isNaN(min)) {
             min = Double.MAX_VALUE;
-            for (float value = iterator.nextFloat(); iterator.hasNext(); value = iterator.nextFloat()) {
+            for (double value = iterator.nextDouble(); iterator.hasNext(); value = iterator.nextDouble()) {
                 min = Math.min(min, value);
             }
             recreateIterator();
@@ -166,8 +165,8 @@ public class FloatCollectionStats implements CollectionStats {
         final double mean = mean();
         final double[] normalised = new double[numElements];
         int i = 0;
-        for (float value = iterator.nextFloat(); iterator.hasNext(); value = iterator.nextFloat()) {
-            Preconditions.checkState(!Float.isNaN(value));
+        for (double value = iterator.nextDouble(); iterator.hasNext(); value = iterator.nextDouble()) {
+            Preconditions.checkState(!Double.isNaN(value));
             normalised[i++] = (((value - mean) / stdDev) * 0.3) + 0.5;
         }
         recreateIterator();
@@ -181,8 +180,8 @@ public class FloatCollectionStats implements CollectionStats {
         final double mean = mean();
         final double[] normalised = new double[numElements];
         int i = 0;
-        for (float value = iterator.nextFloat(); iterator.hasNext(); value = iterator.nextFloat()) {
-            Preconditions.checkState(!Float.isNaN(value));
+        for (double value = iterator.nextDouble(); iterator.hasNext(); value = iterator.nextDouble()) {
+            Preconditions.checkState(!Double.isNaN(value));
             normalised[i++] = (value - mean) / (stdDev * 2);
         }
         recreateIterator();
