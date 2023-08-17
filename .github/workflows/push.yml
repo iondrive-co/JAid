@@ -19,5 +19,14 @@ jobs:
         uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
         with:
           arguments: build
+      - name: Compile Launcher Module
+        run: ./gradlew compileLauncherJava
       - name: Run Junit tests
         run: ./gradlew test
+      - name: Create jlink image with Gradle
+        run: ./gradlew createRuntimeImage
+      - name: Archive jlink image
+        uses: actions/upload-artifact@v2
+        with:
+          name: jlink-image
+          path: build/jAid/
