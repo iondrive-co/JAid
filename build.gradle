@@ -1,34 +1,46 @@
 plugins {
     id 'java'
-    id 'application'
+    id 'application' // Allow running from gradle
 }
+// When running from gradle, this is the main class to launch
 application {
     mainClassName = 'jaid.Launcher'
 }
+// Create a distributable runtime image using the jlink tool
 task createRuntimeImage(type: Exec) {
+    // This is provided by the application plugin
     dependsOn 'installDist'
-
+    // Output here
     def imageDir = file("$buildDir/jAid")
     outputs.dir imageDir
-
+    // Delete any existing directory first
     doFirst {
         imageDir.deleteDir()
     }
-
-    commandLine 'jlink', '--module-path', "$buildDir/classes/java/launcher",
-            '--add-modules', 'java.base,jaid.launcher',
+    // We want to build the launcher, and it depends on some things in util
+    commandLine 'jlink',
+            '--module-path', "$buildDir/classes/java/launcher:$buildDir/classes/java/util",
+            '--add-modules', 'java.base,jaid.launcher,jaid.util',
             '--output', imageDir
 }
+// This is needed so that we can resolve the util configuration
+configurations {
+    utilResolve.extendsFrom utilImplementation
+}
+// This controls where gradle looks for source code
 sourceSets {
-    launcher {
-        java {
-            srcDirs = ['src/main/launcher']
-        }
-    }
     util {
         java {
             srcDirs = ['src/main/util']
         }
+    }
+    launcher {
+        java {
+            srcDirs = ['src/main/launcher']
+        }
+        // Update the launcher module classpath to include util and util resolve
+        compileClasspath += sourceSets.util.output + configurations.utilResolve
+        runtimeClasspath += sourceSets.util.output + configurations.utilResolve
     }
     utilTest {
         java {
@@ -36,6 +48,22 @@ sourceSets {
         }
         compileClasspath += sourceSets.util.output
         runtimeClasspath += sourceSets.util.output
+    }
+}
+// These are needed to import any required modules at compile time
+compileUtilJava {
+    classpath = sourceSets.util.compileClasspath
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath
+        ]
+    }
+}
+compileLauncherJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', sourceSets.launcher.compileClasspath.asPath
+        ]
     }
 }
 
