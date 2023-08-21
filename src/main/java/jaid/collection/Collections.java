@@ -11,7 +11,7 @@ import jaid.function.FloatSupplier;
 
 import java.util.function.DoublePredicate;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.commons.math3.util.MathUtils.checkNotNull;
 
 public class Collections {
 

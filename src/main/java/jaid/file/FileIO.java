@@ -1,7 +1,5 @@
 package jaid.file;
 
-import com.google.common.base.Throwables;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,7 +27,7 @@ public class FileIO {
             fChannel.read(bb);
             fChannel.close();
         } catch (final IOException e) {
-            Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         return barray;
     }
@@ -45,7 +43,7 @@ public class FileIO {
             buffer.put(bytes);
             channel.close();
         } catch (final IOException e) {
-            Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 }
