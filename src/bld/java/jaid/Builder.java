@@ -1,6 +1,7 @@
 package jaid;
 
 import rife.bld.BaseProject;
+import rife.bld.operations.JUnitOperation;
 
 import java.util.List;
 
@@ -26,10 +27,17 @@ public class Builder extends BaseProject {
 
         scope(test)
         .include(dependency("org.assertj", "assertj-core", version(3, 24, 2)))
-        .include(dependency("junit", "junit", version(4, 13, 2)))
+        .include(dependency("org.junit.jupiter", "junit-jupiter", version(5,9,2)))
+        .include(dependency("org.junit.platform", "junit-platform-console-standalone", version(1,9,2)))
         .include(dependency("org.openjdk.jmh", "jmh-core", version(1, 37)))
         .include(dependency("org.openjdk.jmh", "jmh-generator-annprocess", version(1, 37)));
+    }
 
+    private final JUnitOperation junitTestOperation_ = new JUnitOperation();
+
+    @Override
+    public JUnitOperation testOperation() {
+        return junitTestOperation_;
     }
 
     public static void main(String[] args) {

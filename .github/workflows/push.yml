@@ -13,8 +13,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Run Junit tests
+      - name: Grant execute permission for bld
+        run: chmod +x bld
+      - name: Compile
         run: ./bld compile
-        # TODO requires JUnit 5
-#      - name: Run Junit tests
-#        run: ./bld test
+      - name: Run Junit tests
+        run: ./bld test
