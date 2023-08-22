@@ -4,7 +4,7 @@
 package jaid;
 
 import jaid.number.GeometricRandom;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.NavigableMap;
 import java.util.TreeMap;

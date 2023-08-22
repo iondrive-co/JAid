@@ -7,8 +7,8 @@ import jaid.number.CollectionStats;
 import jaid.number.DoubleCollectionStats;
 import jaid.number.FloatCollectionStats;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +24,7 @@ public class CollectionStatsUnitTest {
     double[] vals;
     final double significance = 0.00001;
 
-    @Before
+    @BeforeEach
     public void createStats() {
         vals = new double[10_000];
         final Random tlr = ThreadLocalRandom.current();
