@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+sourceSets {
+    util {
+        java {
+            srcDirs = ['src/main/util']
+        }
+    }
+    utilTest {
+        java {
+            srcDir 'src/test/util'
+        }
+        compileClasspath += sourceSets.util.output
+        runtimeClasspath += sourceSets.util.output
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+    utilImplementation  'org.apache.commons:commons-math3:3.6.1'
+    utilImplementation  'it.unimi.dsi:fastutil:8.5.12'
+    utilImplementation  'com.google.guava:guava:31.1-jre'
+    utilImplementation  'org.slf4j:slf4j-api:2.0.5'
+    utilImplementation  'org.slf4j:log4j-over-slf4j:2.0.5'
+
+    utilTestImplementation configurations.utilImplementation
+    utilTestImplementation 'org.assertj:assertj-core:3.24.2'
+    utilTestImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    utilTestImplementation 'org.junit.platform:junit-platform-console-standalone:1.9.2'
+    utilTestImplementation 'org.openjdk.jmh:jmh-core:1.37'
+    utilTestImplementation 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+}

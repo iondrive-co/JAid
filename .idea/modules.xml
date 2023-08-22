@@ -2,8 +2,16 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/app.iml" filepath="$PROJECT_DIR$/.idea/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/bld.iml" filepath="$PROJECT_DIR$/.idea/bld.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JAid.iml" filepath="$PROJECT_DIR$/.idea/modules/JAid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JAid.launcher.iml" filepath="$PROJECT_DIR$/.idea/modules/JAid.launcher.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JAid.main.iml" filepath="$PROJECT_DIR$/.idea/modules/JAid.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JAid.test.iml" filepath="$PROJECT_DIR$/.idea/modules/JAid.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JAid.util.iml" filepath="$PROJECT_DIR$/.idea/modules/JAid.util.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JAid.utilTest.iml" filepath="$PROJECT_DIR$/.idea/modules/JAid.utilTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects.JAid.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects.JAid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects.JAid.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects.JAid.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects.JAid.util.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects.JAid.util.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects.JAid.utilTest.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects.JAid.utilTest.iml" />
     </modules>
   </component>
 </project>
