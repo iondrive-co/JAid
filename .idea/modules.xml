@@ -10,8 +10,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/JAid.utilTest.iml" filepath="$PROJECT_DIR$/.idea/modules/JAid.utilTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects.JAid.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects.JAid.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects.JAid.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects.JAid.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects.JAid.util.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects.JAid.util.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects.JAid.utilTest.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects.JAid.utilTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects.JAid.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects.JAid.test.iml" />
     </modules>
   </component>
 </project>
