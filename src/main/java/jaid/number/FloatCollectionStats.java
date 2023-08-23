@@ -3,7 +3,7 @@ package jaid.number;
 import com.google.common.base.Preconditions;
 import it.unimi.dsi.fastutil.floats.FloatIterator;
 import it.unimi.dsi.fastutil.floats.FloatList;
-import jaid.collection.Collections;
+import jaid.collection.CollectionUtil;
 import jaid.collection.FloatArrayIterator;
 
 import java.util.Arrays;
@@ -46,7 +46,7 @@ public class FloatCollectionStats implements CollectionStats {
 
     private float[] getSorted() {
         if (sorted == null) {
-            sorted = Collections.extract(iterator, numElements);
+            sorted = CollectionUtil.extract(iterator, numElements);
             Arrays.sort(sorted);
             recreateIterator();
         }
@@ -76,7 +76,7 @@ public class FloatCollectionStats implements CollectionStats {
 
     private float[] getPositiveSorted() {
         if (positiveSorted == null) {
-            final FloatList collectionCopy = Collections.extract(iterator, POSITIVE_CHECK);
+            final FloatList collectionCopy = CollectionUtil.extract(iterator, POSITIVE_CHECK);
             positiveSorted = collectionCopy.toFloatArray();
             Arrays.sort(positiveSorted);
             recreateIterator();

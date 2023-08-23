@@ -3,7 +3,7 @@ package jaid.number;
 import com.google.common.base.Preconditions;
 import it.unimi.dsi.fastutil.doubles.DoubleIterator;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import jaid.collection.Collections;
+import jaid.collection.CollectionUtil;
 import jaid.collection.DoubleArrayIterator;
 
 import java.util.Arrays;
@@ -46,7 +46,7 @@ public final class DoubleCollectionStats implements CollectionStats {
 
     private double[] getSorted() {
         if (sorted == null) {
-            sorted = Collections.extract(iterator, numElements);
+            sorted = CollectionUtil.extract(iterator, numElements);
             Arrays.sort(sorted);
             recreateIterator();
         }
@@ -76,7 +76,7 @@ public final class DoubleCollectionStats implements CollectionStats {
 
     private double[] getPositiveSorted() {
         if (positiveSorted == null) {
-            final DoubleList collectionCopy = Collections.extract(iterator, POSITIVE_CHECK);
+            final DoubleList collectionCopy = CollectionUtil.extract(iterator, POSITIVE_CHECK);
             positiveSorted = collectionCopy.toDoubleArray();
             Arrays.sort(positiveSorted);
             recreateIterator();
