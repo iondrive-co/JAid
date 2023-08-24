@@ -9,6 +9,14 @@ import java.util.Random;
  */
 public class Maths {
 
+    public static boolean isNan(final double[] values) {
+        boolean isNan = false;
+        for (final double value: values) {
+            isNan |= Double.isNaN(value);
+        }
+        return isNan;
+    }
+
     public static double mean(final double[] values) {
         return Arrays.stream(values).summaryStatistics().getAverage();
     }
@@ -34,25 +42,9 @@ public class Maths {
         return 1 / (1 + StrictMath.exp(-value));
     }
 
-//    public static INDArray sigmoid(final INDArray values) {
-//        return pow(exp(values.neg()).add(1), -1);
-//    }
-//
-//    public static INDArray tanh(final INDArray values) {
-//        return sigmoid(values.mul(2)).mul(2).sub(1);
-//    }
-
     public static double sigmoidDerivative(final double value) {
         return value * (1 - value);
     }
-
-//    public static INDArray sigmoidDerivative(final INDArray values) {
-//        return values.mul(Nd4j.onesLike(values).sub(values));
-//    }
-//
-//    public static INDArray tanhDerivative(final INDArray values) {
-//        return Nd4j.onesLike(values).sub(pow(values, 2));
-//    }
 
     public static double random(final Random random, final int lowerBoundInc, final int upperBoundExc) {
         final double val = random.nextDouble();
