@@ -28,11 +28,11 @@ public class FloatVector {
         return (sum / vector1.length);
     }
 
-    public double crossProduct(final FloatVector comparedTo) {
-        return crossProduct(contents, comparedTo.contents);
+    public double dotProduct(final FloatVector comparedTo) {
+        return dotProduct(contents, comparedTo.contents);
     }
 
-    public static double crossProduct(final float[] vector1, final float[] vector2) {
+    public static double dotProduct(final float[] vector1, final float[] vector2) {
         if (vector1.length != vector2.length) {
             throw new IllegalArgumentException();
         }
