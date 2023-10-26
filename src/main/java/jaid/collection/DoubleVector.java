@@ -28,11 +28,11 @@ public class DoubleVector {
         return (sum / vector1.length);
     }
 
-    public double crossProduct(final DoubleVector comparedTo) {
-        return crossProduct(contents, comparedTo.contents);
+    public double dotProduct(final DoubleVector comparedTo) {
+        return dotProduct(contents, comparedTo.contents);
     }
 
-    public static double crossProduct(final double[] vector1, final double[] vector2) {
+    public static double dotProduct(final double[] vector1, final double[] vector2) {
         if (vector1.length != vector2.length) {
             throw new IllegalArgumentException();
         }
