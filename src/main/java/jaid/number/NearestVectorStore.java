@@ -8,19 +8,18 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Maps similar {@link jaid.collection.FloatVector}s into the same hash bucket for efficient K-NN searches.
+ * Similarity is determined by the dot product, so unless you want the vectors magnitude to influence similarity all
+ * vectors should be normalised first so that the dot product becomes the cosine similarity.
  * This is a very simple implementation and will have issues with sparse data etc.
  */
-public class LocalitySensitiveHasher {
+public class NearestVectorStore {
     private final List<HashMap<Integer, List<FloatVector>>> tables;
-    private final int numBuckets;
     private final int vectorDims;
 
-    public LocalitySensitiveHasher(final int numBuckets, final int vectorDims) {
-        this.numBuckets = numBuckets;
+    public NearestVectorStore(final int numBuckets, final int vectorDims) {
         this.vectorDims = vectorDims;
         this.tables = new ArrayList<>();
         for (int i = 0; i < numBuckets; i++) {
@@ -31,8 +30,7 @@ public class LocalitySensitiveHasher {
     public void addVector(final FloatVector vector) {
         Preconditions.checkArgument(vector.contents.length == vectorDims);
         for (HashMap<Integer, List<FloatVector>> table : tables) {
-            int hash = hash(vector);
-            table.computeIfAbsent(hash, k -> new ArrayList<>()).add(vector);
+            table.computeIfAbsent(vector.hashCode(), k -> new ArrayList<>()).add(vector);
         }
     }
 
@@ -40,8 +38,7 @@ public class LocalitySensitiveHasher {
         Preconditions.checkArgument(queryVector.contents.length == vectorDims);
         final PriorityQueue<FloatVector> pq = new PriorityQueue<>(Comparator.comparingDouble(queryVector::dotProduct));
         for (final HashMap<Integer, List<FloatVector>> table : tables) {
-            final int hash = hash(queryVector);
-            final List<FloatVector> bucket = table.get(hash);
+            final List<FloatVector> bucket = table.get(queryVector.hashCode());
             if (bucket != null) {
                 for (FloatVector neighbor : bucket) {
                     pq.offer(neighbor);
@@ -52,17 +49,6 @@ public class LocalitySensitiveHasher {
                 }
             }
         }
-        List<FloatVector> topKNeighbors = new ArrayList<>(pq);
-        return topKNeighbors;
-    }
-
-    private int hash(final FloatVector vector) {
-        int hash = 0;
-        for (int i = 0; i < vectorDims; i++) {
-            if (vector.contents[i] > ThreadLocalRandom.current().nextFloat()) {
-                hash |= 1 << i;
-            }
-        }
-        return hash;
+        return new ArrayList<>(pq);
     }
 }
