@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LocalitySensitiveHasherTest {
+class NearestVectorStoreTest {
 
     @Test
     void query() {
@@ -19,7 +19,7 @@ class LocalitySensitiveHasherTest {
         FloatVector v3 = new FloatVector(new float[]{0.7f, 0.8f, 0.9f});
         FloatVector v4 = new FloatVector(new float[]{0.9f, 0.8f, 0.7f});
         for (int run = 0; run < 1000; run++) {
-            LocalitySensitiveHasher lsh = new LocalitySensitiveHasher(10, 3);
+            NearestVectorStore lsh = new NearestVectorStore(10, 3);
             lsh.addVector(v1);
             lsh.addVector(v2);
             lsh.addVector(v3);

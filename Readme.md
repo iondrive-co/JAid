@@ -4,7 +4,7 @@ Highlights:
 
  - IntSkipList - Sorted collection of ints
  - Tuples - Primitive specialised versions of tuples using java records
- - DoubleVector and FloatVector - Useful vector functions such as mean squared error and dot product
- - LocalitySensitiveHasher - Provides approximate nearest neighbour search for related FloatVectors
+ - DoubleVector and FloatVector - Useful vector functions such as MSE, dot product, and simhashing
+ - NearestVectorStore - Provides approximate nearest neighbour search for related FloatVectors
  - DoubleArrayIterator - An array iterator that does not unbox its operands
  - FileIO - Fast mapping from files to bytes

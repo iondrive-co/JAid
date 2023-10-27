@@ -1,5 +1,7 @@
 package jaid.collection;
 
+import java.util.Arrays;
+
 public class FloatVector {
 
     public float[] contents;
@@ -49,5 +51,42 @@ public class FloatVector {
 //            sum = l.fma(r, sum);
 //        }
 //        return sum.addAll();
+    }
+
+    /**
+     * https://en.wikipedia.org/wiki/SimHash
+     */
+    @Override
+    public int hashCode() {
+        int[] accum = new int[32];
+        for (int i = 0; i < contents.length; i++) {
+            int hash = Float.floatToIntBits(contents[i]);
+            for (int j = 0; j < 32; j++) {
+                if ((hash & (1 << j)) != 0) {
+                    accum[j]++;
+                } else {
+                    accum[j]--;
+                }
+            }
+        }
+        int finalHash = 0;
+        for (int j = 0; j < 32; j++) {
+            if (accum[j] > 0) {
+                finalHash |= (1 << j);
+            }
+        }
+        return finalHash;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        FloatVector that = (FloatVector) o;
+        return Arrays.equals(contents, that.contents);
     }
 }
