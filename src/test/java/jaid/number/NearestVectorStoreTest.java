@@ -1,6 +1,7 @@
 package jaid.number;
 
 import jaid.collection.FloatVector;
+import jaid.collection.IVector;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -19,14 +20,14 @@ class NearestVectorStoreTest {
         FloatVector v3 = new FloatVector(new float[]{0.7f, 0.8f, 0.9f});
         FloatVector v4 = new FloatVector(new float[]{0.9f, 0.8f, 0.7f});
         for (int run = 0; run < 1000; run++) {
-            NearestVectorStore lsh = new NearestVectorStore(10, 3);
+            NearestVectorStore lsh = new NearestVectorStore(3);
             lsh.addVector(v1);
             lsh.addVector(v2);
             lsh.addVector(v3);
             lsh.addVector(v4);
             FloatVector queryVector = new FloatVector(new float[]{0.9f, 0.8f, 0.7f});
-            List<FloatVector> neighbors = lsh.query(queryVector, 2);
-            for (FloatVector neighbor : neighbors) {
+            List<IVector> neighbors = lsh.query(queryVector, 2);
+            for (IVector neighbor : neighbors) {
                 String key = neighbor.toString();
                 histogram.put(key, histogram.getOrDefault(key, 0) + 1);
             }
