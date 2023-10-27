@@ -1,11 +1,15 @@
 package jaid.collection;
 
-public class DoubleVector {
+import com.google.common.base.Preconditions;
+
+import java.util.Arrays;
+
+public class DoubleVector implements IVector {
 
     public double[] contents;
 
     public DoubleVector(double[] contents) {
-        this.contents = contents;
+        this.contents = Preconditions.checkNotNull(contents);
     }
 
     public double meanSquaredError(final DoubleVector comparedTo) {
@@ -28,17 +32,14 @@ public class DoubleVector {
         return (sum / vector1.length);
     }
 
-    public double dotProduct(final DoubleVector comparedTo) {
-        return dotProduct(contents, comparedTo.contents);
-    }
-
-    public static double dotProduct(final double[] vector1, final double[] vector2) {
-        if (vector1.length != vector2.length) {
+    @Override
+    public double dotProduct(final IVector comparedTo) {
+        if (!(comparedTo instanceof DoubleVector) || contents.length != ((FloatVector)comparedTo).contents.length) {
             throw new IllegalArgumentException();
         }
         double sum = 0;
-        for (int i = 0; i < vector1.length; ++i) {
-            sum = Math.fma(vector1[i], vector2[i], sum);
+        for (int i = 0; i < contents.length; ++i) {
+            sum = Math.fma(contents[i], ((DoubleVector)comparedTo).contents[i], sum);
         }
         return sum;
         // TODO when panama is no longer incubating, the following should provide a large speedup
@@ -49,5 +50,49 @@ public class DoubleVector {
 //            sum = l.fma(r, sum);
 //        }
 //        return sum.addAll();
+    }
+
+    @Override
+    public int simHash() {
+        int[] accum = new int[32];
+        for (int i = 0; i < contents.length; i++) {
+            long hash = Double.doubleToLongBits(contents[i]);
+            for (int j = 0; j < 32; j++) {
+                if ((hash & (1 << j)) != 0) {
+                    accum[j]++;
+                } else {
+                    accum[j]--;
+                }
+            }
+        }
+        int finalHash = 0;
+        for (int j = 0; j < 32; j++) {
+            if (accum[j] > 0) {
+                finalHash |= (1 << j);
+            }
+        }
+        return finalHash;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(contents);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DoubleVector that = (DoubleVector) o;
+        return Arrays.equals(contents, that.contents);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(contents);
     }
 }

@@ -1,13 +1,15 @@
 package jaid.collection;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Arrays;
 
-public class FloatVector {
+public class FloatVector implements IVector {
 
     public float[] contents;
 
     public FloatVector(float[] contents) {
-        this.contents = contents;
+        this.contents = Preconditions.checkNotNull(contents);
     }
 
     public float meanSquaredError(final FloatVector comparedTo) {
@@ -30,17 +32,14 @@ public class FloatVector {
         return (sum / vector1.length);
     }
 
-    public double dotProduct(final FloatVector comparedTo) {
-        return dotProduct(contents, comparedTo.contents);
-    }
-
-    public static double dotProduct(final float[] vector1, final float[] vector2) {
-        if (vector1.length != vector2.length) {
+    @Override
+    public double dotProduct(final IVector comparedTo) {
+        if (!(comparedTo instanceof FloatVector) || contents.length != ((FloatVector)comparedTo).contents.length) {
             throw new IllegalArgumentException();
         }
         float sum = 0;
-        for (int i = 0; i < vector1.length; ++i) {
-            sum = Math.fma(vector1[i], vector2[i], sum);
+        for (int i = 0; i < contents.length; ++i) {
+            sum = Math.fma(contents[i], ((FloatVector)comparedTo).contents[i], sum);
         }
         return sum;
         // TODO when panama is no longer incubating, the following should provide a large speedup
@@ -53,11 +52,8 @@ public class FloatVector {
 //        return sum.addAll();
     }
 
-    /**
-     * https://en.wikipedia.org/wiki/SimHash
-     */
     @Override
-    public int hashCode() {
+    public int simHash() {
         int[] accum = new int[32];
         for (int i = 0; i < contents.length; i++) {
             int hash = Float.floatToIntBits(contents[i]);
@@ -79,6 +75,11 @@ public class FloatVector {
     }
 
     @Override
+    public String toString() {
+        return Arrays.toString(contents);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -88,5 +89,10 @@ public class FloatVector {
         }
         FloatVector that = (FloatVector) o;
         return Arrays.equals(contents, that.contents);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(contents);
     }
 }
