@@ -4,9 +4,7 @@ import com.google.common.base.Preconditions;
 
 import java.util.Arrays;
 
-public class DoubleVector implements IVector {
-
-    public double[] contents;
+public record DoubleVector(double[] contents) implements IVector {
 
     public DoubleVector(double[] contents) {
         this.contents = Preconditions.checkNotNull(contents);
@@ -26,20 +24,20 @@ public class DoubleVector implements IVector {
             throw new IllegalArgumentException();
         }
         double sum = 0;
-        for(int i = 0; i < vector1.length; i++) {
-            sum += Math.pow(vector1[i] - vector2[i] , 2 );
+        for (int i = 0; i < vector1.length; i++) {
+            sum += Math.pow(vector1[i] - vector2[i], 2);
         }
         return (sum / vector1.length);
     }
 
     @Override
     public double dotProduct(final IVector comparedTo) {
-        if (!(comparedTo instanceof DoubleVector) || contents.length != ((FloatVector)comparedTo).contents.length) {
+        if (!(comparedTo instanceof DoubleVector) || contents.length != ((DoubleVector) comparedTo).contents.length) {
             throw new IllegalArgumentException();
         }
         double sum = 0;
         for (int i = 0; i < contents.length; ++i) {
-            sum = Math.fma(contents[i], ((DoubleVector)comparedTo).contents[i], sum);
+            sum = Math.fma(contents[i], ((DoubleVector) comparedTo).contents[i], sum);
         }
         return sum;
         // TODO when panama is no longer incubating, the following should provide a large speedup
@@ -50,6 +48,16 @@ public class DoubleVector implements IVector {
 //            sum = l.fma(r, sum);
 //        }
 //        return sum.addAll();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends IVector> T minus(T operand) {
+        final double[] newContents = new double[contents.length];
+        for (int i = 0; i < contents.length; i++) {
+            newContents[i] = contents[i] - ((DoubleVector)operand).contents[i];
+        }
+        return (T)new DoubleVector(newContents);
     }
 
     @Override

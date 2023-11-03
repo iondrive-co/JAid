@@ -4,9 +4,7 @@ import com.google.common.base.Preconditions;
 
 import java.util.Arrays;
 
-public class FloatVector implements IVector {
-
-    public float[] contents;
+public record FloatVector(float[] contents) implements IVector {
 
     public FloatVector(float[] contents) {
         this.contents = Preconditions.checkNotNull(contents);
@@ -26,20 +24,20 @@ public class FloatVector implements IVector {
             throw new IllegalArgumentException();
         }
         float sum = 0;
-        for(int i = 0; i < vector1.length; i++) {
-            sum += Math.pow(vector1[i] - vector2[i] , 2 );
+        for (int i = 0; i < vector1.length; i++) {
+            sum += Math.pow(vector1[i] - vector2[i], 2);
         }
         return (sum / vector1.length);
     }
 
     @Override
     public double dotProduct(final IVector comparedTo) {
-        if (!(comparedTo instanceof FloatVector) || contents.length != ((FloatVector)comparedTo).contents.length) {
+        if (!(comparedTo instanceof FloatVector) || contents.length != ((FloatVector) comparedTo).contents.length) {
             throw new IllegalArgumentException();
         }
         float sum = 0;
         for (int i = 0; i < contents.length; ++i) {
-            sum = Math.fma(contents[i], ((FloatVector)comparedTo).contents[i], sum);
+            sum = Math.fma(contents[i], ((FloatVector) comparedTo).contents[i], sum);
         }
         return sum;
         // TODO when panama is no longer incubating, the following should provide a large speedup
@@ -53,10 +51,20 @@ public class FloatVector implements IVector {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public <T extends IVector> T minus(T operand) {
+        final float[] newContents = new float[contents.length];
+        for (int i = 0; i < contents.length; i++) {
+            newContents[i] = contents[i] - ((FloatVector)operand).contents[i];
+        }
+        return (T)new FloatVector(newContents);
+    }
+
+    @Override
     public int simHash() {
         int[] accum = new int[32];
-        for (int i = 0; i < contents.length; i++) {
-            int hash = Float.floatToIntBits(contents[i]);
+        for (float content : contents) {
+            int hash = Float.floatToIntBits(content);
             for (int j = 0; j < 32; j++) {
                 if ((hash & (1 << j)) != 0) {
                     accum[j]++;

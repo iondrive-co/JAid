@@ -1,59 +1,77 @@
 package jaid.number;
 
+import com.google.common.annotations.VisibleForTesting;
 import jaid.collection.IVector;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.TreeMap;
 
 /**
- * Maps similar {@link jaid.collection.IVector}s into the same hash bucket for efficient K-NN searches.
+ * Maps similar {@link jaid.collection.IVector}s into the same hash bucket for efficient K-NN searches, with a small
+ * search space this extremely simple implementation should be able to outperform more advanced vector DBs and indexes.
  * Similarity is determined by the dot product, so unless you want the vectors magnitude to influence similarity all
  * vectors should be normalised first so that the dot product becomes the cosine similarity.
- * All vectors must be the same size, bucket size defaults to 1/10th the vector size, this might not be suitable for
- * sparse vectors which would also benefit from a more sophisticated implementation incorporating minhash signatures.
+ * This is likely not suitable for small (we only check the closest neighbour) or sparse (there are no minhash
+ * signatures) vectors.
  */
 public class NearestVectorStore {
+    private final TreeMap<Integer, List<IVector>> vectorMap;
 
-    private static final float BUCKET_SIZING_FACTOR = 0.1f;
-    private final List<HashMap<Integer, List<IVector>>> tables;
-
-    public NearestVectorStore(final int vectorDims) {
-        this.tables = new ArrayList<>();
-        final int numBuckets = Math.max(8, Math.round(vectorDims * BUCKET_SIZING_FACTOR));
-        for (int i = 0; i < numBuckets; i++) {
-            tables.add(new HashMap<>());
-        }
+    public NearestVectorStore() {
+        this.vectorMap = new TreeMap<>();
     }
 
-    public void addVector(final IVector vector) {
-        for (final HashMap<Integer, List<IVector>> table : tables) {
-            table.computeIfAbsent(vector.simHash(), k -> new ArrayList<>()).add(vector);
+    public void add(final IVector vector) {
+        int hash = vector.simHash();
+        vectorMap.computeIfAbsent(hash, k -> new ArrayList<>()).add(vector);
+    }
+
+    public boolean remove(final IVector vector) {
+        int hash = vector.simHash();
+        List<IVector> vectorsAtHash = vectorMap.get(hash);
+        if (vectorsAtHash != null) {
+            boolean removed = vectorsAtHash.remove(vector);
+            if (vectorsAtHash.isEmpty()) {
+                vectorMap.remove(hash);
+            }
+            return removed;
         }
+        return false;
     }
 
     public List<IVector> query(final IVector queryVector, final int k) {
-        final PriorityQueue<IVector> pq = new PriorityQueue<>(Comparator.comparingDouble(queryVector::dotProduct));
-        final Set<IVector> seen = new HashSet<>();
-        for (final HashMap<Integer, List<IVector>> table : tables) {
-            final List<IVector> bucket = table.get(queryVector.simHash());
-            if (bucket != null) {
-                for (final IVector neighbor : bucket) {
-                    // If we have not already seen neighbour
-                    if (seen.add(neighbor)) {
-                        pq.offer(neighbor);
-                        if (pq.size() > k) {
-                            // Remove the least similar vector
-                            pq.poll();
-                        }
-                    }
+        final PriorityQueue<IVector> pq = new PriorityQueue<>(Comparator.comparingDouble(o -> -o.dotProduct(queryVector)));
+        final int queryHash = queryVector.simHash();
+
+        // Look for the exact and close hashes
+        Integer floorKey = vectorMap.floorKey(queryHash);
+        Integer ceilingKey = vectorMap.ceilingKey(queryHash);
+
+        // Fetch buckets in the vicinity of the query hash
+        getVectorsFromBucket(queryHash, pq, k);
+        if (floorKey != null) getVectorsFromBucket(floorKey, pq, k);
+        if (ceilingKey != null) getVectorsFromBucket(ceilingKey, pq, k);
+
+        List<IVector> nearest = new ArrayList<>(k);
+        while (!pq.isEmpty() && nearest.size() < k) {
+            nearest.add(pq.poll());
+        }
+        return nearest;
+    }
+
+    @VisibleForTesting
+    void getVectorsFromBucket(final Integer hashKey, final PriorityQueue<IVector> pq, final int k) {
+        List<IVector> bucket = vectorMap.get(hashKey);
+        if (bucket != null) {
+            for (IVector vector : bucket) {
+                pq.offer(vector);
+                if (pq.size() > k) {
+                    pq.poll(); // Remove the least similar vector
                 }
             }
         }
-        return new ArrayList<>(pq);
     }
 }
