@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class NearestVectorStoreTest {
 
     @Test
-    void testGetVectorsFromBucket() {
+    void testGetIdentical() {
         NearestVectorStore store = new NearestVectorStore();
 
         FloatVector v1 = new FloatVector(new float[]{-0.1f, -0.2f, 0.3f});
@@ -34,13 +34,13 @@ class NearestVectorStoreTest {
 
         List<IVector> results = store.query(queryVector, 1);
 
-        // Check if the closest vector is returned
+        // Check if the identical vector is returned
         assertEquals(1, results.size());
         assertSame(v1, results.get(0));
     }
 
     @Test
-    void testQuery() {
+    void testAdjacentVectorsReturned() {
         NearestVectorStore store = new NearestVectorStore();
 
         FloatVector v1 = new FloatVector(new float[]{0.1f, 0.2f, 0.3f});
@@ -63,32 +63,31 @@ class NearestVectorStoreTest {
     @Test
     void queryDistribution() {
         final Random random = new Random(4444);
-        final int vectorDims = 23;
-        final FloatVector v1 = generateRandomVector(vectorDims, random);
-        System.out.println("v1 " + v1 + " hash " + v1.simHash());
-        final FloatVector v2 = generateRandomVector(vectorDims, random);
-        System.out.println("v2 " + v2 + " hash " + v2.simHash());
-        final FloatVector v3 = generateRandomVector(vectorDims, random);
-        System.out.println("v3 " + v3 + " hash " + v3.simHash());
-        final FloatVector v4 = v3.minus(generateFixedVector(vectorDims, 0.001f));
-        System.out.println("v4 " + v4 + " hash " + v4.simHash());
-        final Map<String, Integer> histogram = new HashMap<>();
-        for (int run = 0; run < 1000; run++) {
-            NearestVectorStore store = new NearestVectorStore();
-            store.add(v1);
-            store.add(v2);
-            store.add(v3);
-            store.add(v4);
-            FloatVector queryVector = v4.minus(generateFixedVector(vectorDims, 0.001f));
-            List<IVector> neighbors = store.query(queryVector, 2);
-            for (IVector neighbor : neighbors) {
-                String key = neighbor.toString();
-                histogram.put(key, histogram.getOrDefault(key, 0) + 1);
+        for (int vectorDims = 5; vectorDims < 8; vectorDims++) {
+            final FloatVector v1 = generateRandomVector(vectorDims, random);
+            final FloatVector v2 = generateRandomVector(vectorDims, random);
+            final FloatVector v3 = generateRandomVector(vectorDims, random);
+            final FloatVector v4 = v3.minus(generateFixedVector(vectorDims, 0.001f));
+            final Map<String, Integer> histogram = new HashMap<>();
+            for (int run = 0; run < 1000; run++) {
+                final NearestVectorStore store = new NearestVectorStore();
+                store.add(v1);
+                store.add(v2);
+                store.add(v3);
+                store.add(v4);
+                final FloatVector queryVector = v4.minus(generateFixedVector(vectorDims, 0.001f));
+                final List<IVector> neighbors = store.query(queryVector, 2);
+                for (final IVector neighbor : neighbors) {
+                    String key = neighbor.toString();
+                    histogram.put(key, histogram.getOrDefault(key, 0) + 1);
+                }
             }
+            // After 1000 runs, we expect to see v3 and v4 more often than v1 and v2 for the query.
+            assertTrue(histogram.getOrDefault(v3.toString(), 0) >
+                    histogram.getOrDefault(v1.toString(), 0), "Failed with dims " + vectorDims);
+            assertTrue(histogram.getOrDefault(v4.toString(), 0) >
+                    histogram.getOrDefault(v2.toString(), 0), "Failed with dims " + vectorDims);
         }
-        // After 1000 runs, we expect to see v3 and v4 more often than v1 and v2 for the query.
-        assertTrue(histogram.getOrDefault(v3.toString(), 0) > histogram.getOrDefault(v1.toString(), 0));
-        assertTrue(histogram.getOrDefault(v4.toString(), 0) > histogram.getOrDefault(v2.toString(), 0));
     }
 
     @Test
