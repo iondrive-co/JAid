@@ -6,6 +6,8 @@ public interface IVector {
 
     <T extends IVector> T minus(T operand);
 
+    <T extends IVector> T normalize();
+
     int simHash();
 
     String toString();

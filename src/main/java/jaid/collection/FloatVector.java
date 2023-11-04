@@ -10,10 +10,6 @@ public record FloatVector(float[] contents) implements IVector {
         this.contents = Preconditions.checkNotNull(contents);
     }
 
-    public float meanSquaredError(final FloatVector comparedTo) {
-        return distance(contents, comparedTo.contents);
-    }
-
     /**
      * Calculate the mean squared error.
      * for vectors v1 and v2 of length I calculate
@@ -50,6 +46,10 @@ public record FloatVector(float[] contents) implements IVector {
 //        return sum.addAll();
     }
 
+    public float meanSquaredError(final FloatVector comparedTo) {
+        return distance(contents, comparedTo.contents);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T extends IVector> T minus(T operand) {
@@ -58,6 +58,18 @@ public record FloatVector(float[] contents) implements IVector {
             newContents[i] = contents[i] - ((FloatVector)operand).contents[i];
         }
         return (T)new FloatVector(newContents);
+    }
+
+    @Override
+    public FloatVector normalize() {
+        float magnitude = (float)Math.sqrt(this.dotProduct(this));
+        if (magnitude == 0) return this; // avoid division by zero for a zero vector
+
+        float[] normalizedContents = new float[this.contents.length];
+        for (int i = 0; i < this.contents.length; i++) {
+            normalizedContents[i] = this.contents[i] / magnitude;
+        }
+        return new FloatVector(normalizedContents);
     }
 
     @Override

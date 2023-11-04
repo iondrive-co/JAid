@@ -19,14 +19,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NearestVectorStoreTest {
 
+    private static final Random RANDOM = new Random(4444);
+
     @Test
     void testGetIdentical() {
         NearestVectorStore store = new NearestVectorStore();
 
-        FloatVector v1 = new FloatVector(new float[]{-0.1f, -0.2f, 0.3f});
-        FloatVector v2 = new FloatVector(new float[]{-0.4f, 0.5f, -0.6f});
-        FloatVector v3 = new FloatVector(new float[]{-0.7f, -0.8f, 0.9f});
-        FloatVector queryVector = new FloatVector(new float[]{-0.1f, -0.2f, 0.3f});
+        FloatVector v1 = new FloatVector(new float[]{-0.1f, -0.2f, 0.3f}).normalize();
+        FloatVector v2 = new FloatVector(new float[]{-0.4f, 0.5f, -0.6f}).normalize();
+        FloatVector v3 = new FloatVector(new float[]{-0.7f, -0.8f, 0.9f}).normalize();
+        FloatVector queryVector = new FloatVector(new float[]{-0.1f, -0.2f, 0.3f}).normalize();
 
         store.add(v1);
         store.add(v2);
@@ -62,11 +64,10 @@ class NearestVectorStoreTest {
 
     @Test
     void queryDistribution() {
-        final Random random = new Random(4444);
-        for (int vectorDims = 5; vectorDims < 8; vectorDims++) {
-            final FloatVector v1 = generateRandomVector(vectorDims, random);
-            final FloatVector v2 = generateRandomVector(vectorDims, random);
-            final FloatVector v3 = generateRandomVector(vectorDims, random);
+        for (int vectorDims = 3; vectorDims < 200; vectorDims++) {
+            final FloatVector v1 = generateRandomVector(vectorDims, RANDOM);
+            final FloatVector v2 = generateRandomVector(vectorDims, RANDOM);
+            final FloatVector v3 = generateRandomVector(vectorDims, RANDOM);
             final FloatVector v4 = v3.minus(generateFixedVector(vectorDims, 0.001f));
             final Map<String, Integer> histogram = new HashMap<>();
             for (int run = 0; run < 1000; run++) {

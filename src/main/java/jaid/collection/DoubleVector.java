@@ -10,10 +10,6 @@ public record DoubleVector(double[] contents) implements IVector {
         this.contents = Preconditions.checkNotNull(contents);
     }
 
-    public double meanSquaredError(final DoubleVector comparedTo) {
-        return distance(contents, comparedTo.contents);
-    }
-
     /**
      * Calculate the mean squared error.
      * for vectors v1 and v2 of length I calculate
@@ -50,6 +46,10 @@ public record DoubleVector(double[] contents) implements IVector {
 //        return sum.addAll();
     }
 
+    public double meanSquaredError(final DoubleVector comparedTo) {
+        return distance(contents, comparedTo.contents);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T extends IVector> T minus(T operand) {
@@ -58,6 +58,18 @@ public record DoubleVector(double[] contents) implements IVector {
             newContents[i] = contents[i] - ((DoubleVector)operand).contents[i];
         }
         return (T)new DoubleVector(newContents);
+    }
+
+    @Override
+    public DoubleVector normalize() {
+        double magnitude = Math.sqrt(this.dotProduct(this));
+        if (magnitude == 0) return this; // avoid division by zero for a zero vector
+
+        double[] normalizedContents = new double[this.contents.length];
+        for (int i = 0; i < this.contents.length; i++) {
+            normalizedContents[i] = this.contents[i] / magnitude;
+        }
+        return new DoubleVector(normalizedContents);
     }
 
     @Override
