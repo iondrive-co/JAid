@@ -73,7 +73,17 @@ public record FloatVector(float[] contents) implements IVector {
     }
 
     @Override
-    public int simHash() {
+    @SuppressWarnings("unchecked")
+    public <T extends IVector> T plus(T operand) {
+        final float[] newContents = new float[contents.length];
+        for (int i = 0; i < contents.length; i++) {
+            newContents[i] = contents[i] + ((FloatVector)operand).contents[i];
+        }
+        return (T)new FloatVector(newContents);
+    }
+
+    @Override
+    public int[] simHashCounts() {
         int[] accum = new int[32];
         for (float content : contents) {
             int hash = Float.floatToIntBits(content);
@@ -85,13 +95,7 @@ public record FloatVector(float[] contents) implements IVector {
                 }
             }
         }
-        int finalHash = 0;
-        for (int j = 0; j < 32; j++) {
-            if (accum[j] > 0) {
-                finalHash |= (1 << j);
-            }
-        }
-        return finalHash;
+        return accum;
     }
 
     @Override

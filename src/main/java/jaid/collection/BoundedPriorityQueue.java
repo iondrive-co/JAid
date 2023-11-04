@@ -28,6 +28,10 @@ public class BoundedPriorityQueue {
         return queue.stream().map(c -> c.vector).collect(Collectors.toList());
     }
 
+    public int size() {
+        return queue.size();
+    }
+
     private static class Candidate {
         final IVector vector;
         final double dotProduct;

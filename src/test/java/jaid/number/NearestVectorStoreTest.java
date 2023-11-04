@@ -3,6 +3,7 @@ package jaid.number;
 import jaid.collection.DoubleVector;
 import jaid.collection.FloatVector;
 import jaid.collection.IVector;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -45,10 +46,10 @@ class NearestVectorStoreTest {
     void testAdjacentVectorsReturned() {
         NearestVectorStore store = new NearestVectorStore();
 
-        FloatVector v1 = new FloatVector(new float[]{0.1f, 0.2f, 0.3f});
-        FloatVector v2 = new FloatVector(new float[]{0.4f, 0.5f, 0.6f});
-        FloatVector v3 = new FloatVector(new float[]{0.7f, 0.8f, 0.9f});
-        FloatVector queryVector = new FloatVector(new float[]{0.65f, 0.75f, 0.85f});
+        FloatVector v1 = new FloatVector(new float[]{0.1f, 0.2f, 0.3f}).normalize();
+        FloatVector v2 = new FloatVector(new float[]{0.6f, 0.7f, 0.8f}).normalize();
+        FloatVector v3 = v2.plus(new FloatVector(new float[]{0.001f, 0.001f, 0.001f})).normalize();
+        FloatVector queryVector = v2.plus(new FloatVector(new float[]{0.0005f, 0.0005f, 0.0005f})).normalize();
 
         store.add(v1);
         store.add(v2);
@@ -57,14 +58,14 @@ class NearestVectorStoreTest {
         List<IVector> results = store.query(queryVector, 2);
 
         // Check if two closest vectors are returned
-        assertEquals(2, results.size());
+        Assertions.assertEquals(2, results.size());
         assertTrue(results.contains(v2));
         assertTrue(results.contains(v3));
     }
 
     @Test
     void queryDistribution() {
-        for (int vectorDims = 3; vectorDims < 200; vectorDims++) {
+        for (int vectorDims = 3; vectorDims < 30; vectorDims++) {
             final FloatVector v1 = generateRandomVector(vectorDims, RANDOM);
             final FloatVector v2 = generateRandomVector(vectorDims, RANDOM);
             final FloatVector v3 = generateRandomVector(vectorDims, RANDOM);

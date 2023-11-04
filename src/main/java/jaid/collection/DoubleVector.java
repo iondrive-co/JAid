@@ -73,25 +73,29 @@ public record DoubleVector(double[] contents) implements IVector {
     }
 
     @Override
-    public int simHash() {
-        int[] accum = new int[32];
+    @SuppressWarnings("unchecked")
+    public <T extends IVector> T plus(T operand) {
+        final double[] newContents = new double[contents.length];
+        for (int i = 0; i < contents.length; i++) {
+            newContents[i] = contents[i] + ((DoubleVector)operand).contents[i];
+        }
+        return (T)new DoubleVector(newContents);
+    }
+
+    @Override
+    public int[] simHashCounts() {
+        int[] accum = new int[64];
         for (int i = 0; i < contents.length; i++) {
             long hash = Double.doubleToLongBits(contents[i]);
-            for (int j = 0; j < 32; j++) {
-                if ((hash & (1 << j)) != 0) {
+            for (int j = 0; j < 64; j++) {
+                if ((hash & (1L << j)) != 0) {
                     accum[j]++;
                 } else {
                     accum[j]--;
                 }
             }
         }
-        int finalHash = 0;
-        for (int j = 0; j < 32; j++) {
-            if (accum[j] > 0) {
-                finalHash |= (1 << j);
-            }
-        }
-        return finalHash;
+        return accum;
     }
 
     @Override
