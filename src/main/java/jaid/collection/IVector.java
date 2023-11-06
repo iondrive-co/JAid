@@ -13,28 +13,27 @@ public interface IVector {
     <T extends IVector> T plus(T operand);
 
     /**
-     * Allocates this vector to one of 256 buckets
-     * TODO we want the number of buckets to be user specified, so we can increase the buckets as we get more vectors
+     * Allocates this vector to one of n buckets, where n is 2^pow
      */
-    default byte simBucket() {
+    default int simBucket(int pow) {
         final int[] accum = simHashCounts();
+        Preconditions.checkArgument(pow > 0, "Power must be positive and non-zero.");
+        Preconditions.checkArgument(pow <= 5, "Power cannot exceed bit length of hash.");
+        int buckets = 1 << pow;
+        int segmentSize = accum.length / buckets;
         int finalHash = 0;
-        int bitsPerSection;
-        // Determine the number of bits each section of the 'accum' array contributes to the final byte
-        Preconditions.checkArgument(accum.length % Byte.SIZE == 0);
-        bitsPerSection = accum.length / Byte.SIZE;
-        for (int i = 0; i < 8; i++) {
+        // Calculate the bit value for each bucket by iterating over each segment.
+        for (int bucket = 0; bucket < buckets; bucket++) {
             int sum = 0;
-            // Combine the relevant 'bitsPerSection' bits to get a single bit for the final hash.
-            for (int j = i * bitsPerSection; j < (i + 1) * bitsPerSection; j++) {
+            for (int j = bucket * segmentSize; j < (bucket + 1) * segmentSize; j++) {
                 sum += accum[j];
             }
-            // If the sum is positive, set the bit, otherwise leave it as 0
+            // Set bit in finalHash if sum of that segment is greater than zero.
             if (sum > 0) {
-                finalHash |= (1 << i);
+                finalHash |= (1 << bucket);
             }
         }
-        return (byte) finalHash;
+        return finalHash;
     }
 
     int[] simHashCounts();
