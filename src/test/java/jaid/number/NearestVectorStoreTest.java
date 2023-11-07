@@ -65,7 +65,7 @@ class NearestVectorStoreTest {
 
     @Test
     void queryDistribution() {
-        for (int vectorDims = 3; vectorDims < 30; vectorDims++) {
+        for (int vectorDims = 3; vectorDims < 200; vectorDims++) {
             final FloatVector v1 = generateRandomVector(vectorDims, RANDOM);
             final FloatVector v2 = generateRandomVector(vectorDims, RANDOM);
             final FloatVector v3 = generateRandomVector(vectorDims, RANDOM);

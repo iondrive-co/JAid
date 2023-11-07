@@ -1,7 +1,7 @@
 package jaid.number;
 
-import it.unimi.dsi.fastutil.bytes.Byte2ReferenceArrayMap;
-import it.unimi.dsi.fastutil.bytes.Byte2ReferenceMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import jaid.collection.BoundedPriorityQueue;
 import jaid.collection.IVector;
 
@@ -20,14 +20,16 @@ import static java.util.Collections.emptyList;
  * minhash signatures.
  */
 public class NearestVectorStore {
-    private final Byte2ReferenceMap<List<IVector>> vectors = new Byte2ReferenceArrayMap<>();
+    private final Int2ReferenceMap<List<IVector>> vectors = new Int2ReferenceArrayMap<>();
+    // TODO adjust this dynamically as the map grows and shrinks - this will require rebucketing the whole map when it changes
+    private final int universePower = 4;
 
     public void add(final IVector vector) {
-        vectors.computeIfAbsent(vector.simBucket(), k -> new ArrayList<>()).add(vector);
+        vectors.computeIfAbsent(vector.simBucket(universePower), k -> new ArrayList<>()).add(vector);
     }
 
     public boolean remove(final IVector vector) {
-        byte simBucket = vector.simBucket();
+        int simBucket = vector.simBucket(universePower);
         List<IVector> vectorsAtHash = vectors.get(simBucket);
         if (vectorsAtHash != null) {
             boolean removed = vectorsAtHash.remove(vector);
@@ -42,11 +44,7 @@ public class NearestVectorStore {
     public List<IVector> query(final IVector queryVector, final int k) {
         // Sort results by their dot product, dropping any that are too low
         final BoundedPriorityQueue pq = new BoundedPriorityQueue(k);
-        vectors.getOrDefault(queryVector.simBucket(), emptyList()).forEach(v -> pq.add(v, v.dotProduct(queryVector)));
-        // TODO better bucketing to work without this
-        if (pq.size() < k) {
-            vectors.values().forEach(l -> l.forEach(v -> pq.add(v, v.dotProduct(queryVector))));
-        }
+        vectors.getOrDefault(queryVector.simBucket(universePower), emptyList()).forEach(v -> pq.add(v, v.dotProduct(queryVector)));
         return pq.toList();
     }
 }

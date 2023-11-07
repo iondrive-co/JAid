@@ -83,19 +83,17 @@ public record FloatVector(float[] contents) implements IVector {
     }
 
     @Override
-    public int[] simHashCounts() {
-        int[] accum = new int[32];
+    public long simHashCounts() {
+        int finalHash = 0;
         for (float content : contents) {
             int hash = Float.floatToIntBits(content);
             for (int j = 0; j < 32; j++) {
                 if ((hash & (1 << j)) != 0) {
-                    accum[j]++;
-                } else {
-                    accum[j]--;
+                    finalHash |= (1 << j);
                 }
             }
         }
-        return accum;
+        return finalHash;
     }
 
     @Override

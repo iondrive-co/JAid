@@ -9,6 +9,8 @@ import java.util.Random;
  */
 public class Maths {
 
+    public static long INTEGER_RANGE = ((long)Integer.MAX_VALUE) - (long)Integer.MIN_VALUE + 1; // plus one to include Integer.MIN_VALUE itself.
+
     public static boolean isNan(final double[] values) {
         boolean isNan = false;
         for (final double value: values) {

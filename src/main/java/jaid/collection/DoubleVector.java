@@ -83,20 +83,19 @@ public record DoubleVector(double[] contents) implements IVector {
     }
 
     @Override
-    public int[] simHashCounts() {
-        int[] accum = new int[64];
-        for (int i = 0; i < contents.length; i++) {
-            long hash = Double.doubleToLongBits(contents[i]);
+    public long simHashCounts() {
+        long finalHash = 0L;
+        for (double content : contents) {
+            long hash = Double.doubleToLongBits(content);
             for (int j = 0; j < 64; j++) {
                 if ((hash & (1L << j)) != 0) {
-                    accum[j]++;
-                } else {
-                    accum[j]--;
+                    finalHash |= (1L << j);
                 }
             }
         }
-        return accum;
+        return finalHash;
     }
+
 
     @Override
     public String toString() {
