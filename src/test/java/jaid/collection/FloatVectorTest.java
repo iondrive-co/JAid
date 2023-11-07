@@ -5,76 +5,36 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 
+import static jaid.number.Maths.INTEGER_RANGE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class FloatVectorTest {
 
-    class MockFloatVector implements IVector {
-        private int[] presetHashCounts;
-
-        public MockFloatVector(int[] presetHashCounts) {
-            this.presetHashCounts = presetHashCounts;
-        }
-
-        @Override
-        public double dotProduct(IVector comparedTo) {
-            return 0;
-        }
-
-        @Override
-        public <T extends IVector> T minus(T operand) {
-            return null;
-        }
-
-        @Override
-        public <T extends IVector> T normalize() {
-            return null;
-        }
-
-        @Override
-        public <T extends IVector> T plus(T operand) {
-            return null;
-        }
-
-        @Override
-        public int[] simHashCounts() {
-            // Return the preset hash counts for testing
-            return this.presetHashCounts;
-        }
-    }
-
     @Test
-    public void testSimBucketRange() {
-        int maxPow = 5;
-        for (int pow = 1; pow <= maxPow; pow++) {
-            int segments = 1 << pow;
-            int segmentSize = 32 / segments;
-            int[] hashCounts = new int[32];
-
-            // Generate hashCounts that produce a unique sum for each segment
-            for (int i = 0; i < segments; i++) {
-                // Set the hash count for each segment to guarantee the expected bucket outcome
-                for (int j = 0; j < segmentSize; j++) {
-                    hashCounts[i * segmentSize + j] = (i % 2 == 0) ? 1 : -1; // Alternate to ensure distribution across buckets
+    public void testSimBucketBits() {
+        // Testing different bits sizes.
+        for (int bits = 1; bits <= 8; bits++) {
+            Set<Integer> uniqueBuckets = new HashSet<>();
+            int numberOfBuckets = (int) Math.pow(2, bits);
+            long rangePerBucket = INTEGER_RANGE / numberOfBuckets;
+            for (int i = 0; i < numberOfBuckets; i++) {
+                // Pick the midpoint in the current range segment for the bucket.
+                long midpoint = (long) Integer.MIN_VALUE + rangePerBucket * i + rangePerBucket / 2;
+                // Ensure the midpoint is not out of the int range due to rounding on the edges.
+                if (i == numberOfBuckets - 1) {
+                    midpoint = Integer.MAX_VALUE;
+                } else if (midpoint > Integer.MAX_VALUE) {
+                    // Correct overflow by mirroring back into range.
+                    midpoint = Integer.MAX_VALUE - (midpoint - Integer.MAX_VALUE);
                 }
+                // Cast midpoint to int, since we've taken care of overflows above.
+                int hashValue = (int) midpoint;
+                // Create a FloatVector instance and test simBucket for current bits, should map to i-th bucket.
+                FloatVector testVector = new FloatVector(new float[0]);
+                uniqueBuckets.add(testVector.simBucket(bits, hashValue));
             }
-            // Test the expected number of unique buckets with these counts
-            MockFloatVector mockVector = new MockFloatVector(hashCounts);
-            Set<Integer> buckets = new HashSet<>();
-            for (int i = 0; i < segments; i++) {
-                // Set one index in each segment to flip the simulated hash count, influencing the bucket result
-                for (int j = 0; j < segmentSize; j++) {
-                    hashCounts[i * segmentSize + j] *= -1;
-                }
-                buckets.add(mockVector.simBucket(pow));
-                // Reset for the next iteration
-                for (int j = 0; j < segmentSize; j++) {
-                    hashCounts[i * segmentSize + j] *= -1;
-                }
-            }
-            assertThat(buckets.size())
-                    .as("Expected %d unique buckets for power %d, but got %d.", segments, pow, buckets.size())
-                    .isEqualTo(segments);
+            // Verify we have the correct number of unique buckets for the bits size.
+            assertThat(uniqueBuckets).hasSize(numberOfBuckets);
         }
     }
 }
