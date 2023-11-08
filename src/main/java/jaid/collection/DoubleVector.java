@@ -85,7 +85,7 @@ public record DoubleVector(double[] contents) implements IVector {
     }
 
     @Override
-    public int simBucket(int bits) {
+    public int simBucket(byte bits) {
         long finalHash = 0L;
         for (double content : contents) {
             long hash = Double.doubleToLongBits(content);

@@ -85,7 +85,7 @@ public record FloatVector(float[] contents) implements IVector {
     }
 
     @Override
-    public int simBucket(int bits) {
+    public int simBucket(byte bits) {
         int finalHash = 0;
         for (float content : contents) {
             int hash = Float.floatToIntBits(content);

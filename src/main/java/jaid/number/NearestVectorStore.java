@@ -22,7 +22,7 @@ import static java.util.Collections.emptyList;
 public class NearestVectorStore {
     private final Int2ReferenceMap<List<IVector>> vectors = new Int2ReferenceArrayMap<>();
     // TODO adjust this dynamically as the map grows and shrinks - this will require rebucketing the whole map when it changes
-    private final int universePower = 4;
+    private final byte universePower = 4;
 
     public void add(final IVector vector) {
         vectors.computeIfAbsent(vector.simBucket(universePower), k -> new ArrayList<>()).add(vector);
