@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 
 import java.util.Arrays;
 
+import static jaid.number.HashingUtil.compressHash;
+
 public record DoubleVector(double[] contents) implements IVector {
 
     public DoubleVector(double[] contents) {
@@ -83,7 +85,7 @@ public record DoubleVector(double[] contents) implements IVector {
     }
 
     @Override
-    public long simHashCounts() {
+    public int simBucket(int bits) {
         long finalHash = 0L;
         for (double content : contents) {
             long hash = Double.doubleToLongBits(content);
@@ -93,9 +95,8 @@ public record DoubleVector(double[] contents) implements IVector {
                 }
             }
         }
-        return finalHash;
+        return compressHash(bits, finalHash, (byte)64);
     }
-
 
     @Override
     public String toString() {

@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 
 import java.util.Arrays;
 
+import static jaid.number.HashingUtil.compressHash;
+
 public record FloatVector(float[] contents) implements IVector {
 
     public FloatVector(float[] contents) {
@@ -83,7 +85,7 @@ public record FloatVector(float[] contents) implements IVector {
     }
 
     @Override
-    public long simHashCounts() {
+    public int simBucket(int bits) {
         int finalHash = 0;
         for (float content : contents) {
             int hash = Float.floatToIntBits(content);
@@ -93,7 +95,7 @@ public record FloatVector(float[] contents) implements IVector {
                 }
             }
         }
-        return finalHash;
+        return compressHash(bits, finalHash, (byte)32);
     }
 
     @Override

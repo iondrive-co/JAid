@@ -1,19 +1,20 @@
-package jaid.collection;
+package jaid.number;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import static jaid.number.HashingUtil.compressHash;
 import static jaid.number.Maths.INTEGER_RANGE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FloatVectorTest {
+class HashingUtilTest {
 
     @Test
-    public void testSimBucketBits() {
+    void testCompressHash() {
         // Testing different bits sizes.
-        for (int bits = 1; bits <= 8; bits++) {
+        for (int bits = 1; bits <= 16; bits++) {
             Set<Integer> uniqueBuckets = new HashSet<>();
             int numberOfBuckets = (int) Math.pow(2, bits);
             long rangePerBucket = INTEGER_RANGE / numberOfBuckets;
@@ -30,11 +31,10 @@ public class FloatVectorTest {
                 // Cast midpoint to int, since we've taken care of overflows above.
                 int hashValue = (int) midpoint;
                 // Create a FloatVector instance and test simBucket for current bits, should map to i-th bucket.
-                FloatVector testVector = new FloatVector(new float[0]);
-                uniqueBuckets.add(testVector.simBucket(bits, hashValue));
+                uniqueBuckets.add(compressHash(bits, hashValue, (byte) 32));
             }
             // Verify we have the correct number of unique buckets for the bits size.
-            assertThat(uniqueBuckets).hasSize(numberOfBuckets);
+            assertThat(uniqueBuckets).as("Testing bits: " + bits).hasSize(numberOfBuckets);
         }
     }
 }
