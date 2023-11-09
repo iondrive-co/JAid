@@ -1,5 +1,6 @@
 package jaid.number;
 
+import com.google.common.annotations.VisibleForTesting;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import jaid.collection.BoundedPriorityQueue;
@@ -21,10 +22,14 @@ import static java.util.Collections.emptyList;
  */
 public class NearestVectorStore {
     private final Int2ReferenceMap<List<IVector>> vectors = new Int2ReferenceArrayMap<>();
-    // TODO adjust this dynamically as the map grows and shrinks - this will require rebucketing the whole map when it changes
-    private final byte universePower = 4;
+    private byte universePower = calculateUniversePower(vectors.size());
 
     public void add(final IVector vector) {
+        final byte newUniversePower = calculateUniversePower(vectors.size() + 1);
+        if (newUniversePower != universePower) {
+            universePower = newUniversePower;
+            rebucket();
+        }
         vectors.computeIfAbsent(vector.simBucket(universePower), k -> new ArrayList<>()).add(vector);
     }
 
@@ -36,6 +41,11 @@ public class NearestVectorStore {
             if (vectorsAtHash.isEmpty()) {
                 vectors.remove(simBucket);
             }
+            byte newUniversePower = calculateUniversePower(vectors.size());
+            if (newUniversePower != universePower) {
+                universePower = newUniversePower;
+                rebucket();
+            }
             return removed;
         }
         return false;
@@ -46,5 +56,29 @@ public class NearestVectorStore {
         final BoundedPriorityQueue pq = new BoundedPriorityQueue(k);
         vectors.getOrDefault(queryVector.simBucket(universePower), emptyList()).forEach(v -> pq.add(v, v.dotProduct(queryVector)));
         return pq.toList();
+    }
+
+    @VisibleForTesting
+    protected byte calculateUniversePower(int size) {
+        if (size < 10_000) {
+            // Up until 10_000 put everything in a single bucket
+            return 0;
+        }
+        else if (size <= 100_000)  {
+            // Up until 100_000 use 2^4 buckets
+            return 4;
+        }
+        else return 16;
+    }
+
+    private void rebucket() {
+        final Int2ReferenceMap<List<IVector>> newVectors = new Int2ReferenceArrayMap<>();
+        for (List<IVector> vectorList : vectors.values()) {
+            for (IVector vector : vectorList) {
+                newVectors.computeIfAbsent(vector.simBucket(universePower), k -> new ArrayList<>()).add(vector);
+            }
+        }
+        vectors.clear();
+        vectors.putAll(newVectors);
     }
 }

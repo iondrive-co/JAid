@@ -9,6 +9,9 @@ public class HashingUtil {
      * @param inputBits number of bits from the long input hash to use, i.e. if 16 then throw away the upper 48 bits
      */
     public static int compressHash(byte outputBits, long hash, byte inputBits) {
+        if (outputBits == 0) {
+            return 0;
+        }
         Preconditions.checkArgument(outputBits > 0);
         Preconditions.checkArgument(outputBits <= 32);
         Preconditions.checkArgument(inputBits > 0);

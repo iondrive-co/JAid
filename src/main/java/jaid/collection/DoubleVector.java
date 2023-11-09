@@ -86,6 +86,10 @@ public record DoubleVector(double[] contents) implements IVector {
 
     @Override
     public int simBucket(byte bits) {
+        // Shortcut - if we want every hash to be the same, then don't compute anything
+        if (bits == 0) {
+            return 0;
+        }
         long finalHash = 0L;
         for (double content : contents) {
             long hash = Double.doubleToLongBits(content);
