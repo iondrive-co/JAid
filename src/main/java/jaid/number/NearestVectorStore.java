@@ -1,6 +1,8 @@
 package jaid.number;
 
 import com.google.common.annotations.VisibleForTesting;
+import it.unimi.dsi.fastutil.ints.Int2ByteAVLTreeMap;
+import it.unimi.dsi.fastutil.ints.Int2ByteMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import jaid.collection.BoundedPriorityQueue;
@@ -8,6 +10,7 @@ import jaid.collection.IVector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.emptyList;
 
@@ -21,31 +24,47 @@ import static java.util.Collections.emptyList;
  * minhash signatures.
  */
 public class NearestVectorStore {
+
+    /**
+     * When to break {@link #vectors} into more buckets, mapped to the bits to use for the bucket size (i.e. 2^4)
+     */
+    private static final Map<Integer, Byte> DEFAULT_BUCKET_THRESHOLDS = Map.of(
+            10_000, (byte)0,
+            100_000, (byte)4,
+            Integer.MAX_VALUE, (byte)16);
+    private final Int2ByteAVLTreeMap thresholds;
     private final Int2ReferenceMap<List<IVector>> vectors = new Int2ReferenceArrayMap<>();
-    private byte universePower = calculateUniversePower(vectors.size());
+    private int size;
+    private byte bucketSizeExponent;
+
+    public NearestVectorStore() {
+        this(DEFAULT_BUCKET_THRESHOLDS);
+    }
+
+    @VisibleForTesting
+    NearestVectorStore(final Map<Integer, Byte> thresholds) {
+        // Need to ensure this is sorted ascending
+        this.thresholds = new Int2ByteAVLTreeMap(thresholds);
+        updateBuckets();
+    }
 
     public void add(final IVector vector) {
-        final byte newUniversePower = calculateUniversePower(vectors.size() + 1);
-        if (newUniversePower != universePower) {
-            universePower = newUniversePower;
-            rebucket();
-        }
-        vectors.computeIfAbsent(vector.simBucket(universePower), k -> new ArrayList<>()).add(vector);
+        size += 1;
+        updateBuckets();
+        vectors.computeIfAbsent(vector.simBucket(bucketSizeExponent), k -> new ArrayList<>()).add(vector);
     }
 
     public boolean remove(final IVector vector) {
-        int simBucket = vector.simBucket(universePower);
+        int simBucket = vector.simBucket(bucketSizeExponent);
         List<IVector> vectorsAtHash = vectors.get(simBucket);
         if (vectorsAtHash != null) {
             boolean removed = vectorsAtHash.remove(vector);
+
             if (vectorsAtHash.isEmpty()) {
                 vectors.remove(simBucket);
             }
-            byte newUniversePower = calculateUniversePower(vectors.size());
-            if (newUniversePower != universePower) {
-                universePower = newUniversePower;
-                rebucket();
-            }
+            size -= 1;
+            updateBuckets();
             return removed;
         }
         return false;
@@ -54,31 +73,43 @@ public class NearestVectorStore {
     public List<IVector> query(final IVector queryVector, final int k) {
         // Sort results by their dot product, dropping any that are too low
         final BoundedPriorityQueue pq = new BoundedPriorityQueue(k);
-        vectors.getOrDefault(queryVector.simBucket(universePower), emptyList()).forEach(v -> pq.add(v, v.dotProduct(queryVector)));
+        vectors.getOrDefault(queryVector.simBucket(bucketSizeExponent), emptyList()).forEach(v -> pq.add(v, v.dotProduct(queryVector)));
         return pq.toList();
     }
 
-    @VisibleForTesting
-    protected byte calculateUniversePower(int size) {
-        if (size < 10_000) {
-            // Up until 10_000 put everything in a single bucket
-            return 0;
-        }
-        else if (size <= 100_000)  {
-            // Up until 100_000 use 2^4 buckets
-            return 4;
-        }
-        else return 16;
+    public byte getBucketSizeExponent() {
+        return bucketSizeExponent;
     }
 
-    private void rebucket() {
-        final Int2ReferenceMap<List<IVector>> newVectors = new Int2ReferenceArrayMap<>();
-        for (List<IVector> vectorList : vectors.values()) {
-            for (IVector vector : vectorList) {
-                newVectors.computeIfAbsent(vector.simBucket(universePower), k -> new ArrayList<>()).add(vector);
+    public int size() {
+        return size;
+    }
+
+    public void clear() {
+        vectors.clear();
+        size = 0;
+        updateBuckets();
+    }
+
+    @VisibleForTesting
+    protected void updateBuckets() {
+        // thresholds are sorted ascending, so find the first one that applies
+        final byte oldBucketSizeExponent = bucketSizeExponent;
+        for (final Int2ByteMap.Entry entry : thresholds.int2ByteEntrySet()) {
+            if (size < entry.getIntKey()) {
+                bucketSizeExponent = entry.getByteValue();
+                break;
             }
         }
-        vectors.clear();
-        vectors.putAll(newVectors);
+        if (oldBucketSizeExponent != bucketSizeExponent) {
+            final Int2ReferenceMap<List<IVector>> newVectors = new Int2ReferenceArrayMap<>();
+            for (final List<IVector> vectorList : vectors.values()) {
+                for (final IVector vector : vectorList) {
+                    newVectors.computeIfAbsent(vector.simBucket(bucketSizeExponent), k -> new ArrayList<>()).add(vector);
+                }
+            }
+            vectors.clear();
+            vectors.putAll(newVectors);
+        }
     }
 }
