@@ -78,14 +78,15 @@ class NearestVectorStoreTest {
     @Test
     void queryDistribution() {
         for (int vectorDims = 3; vectorDims < 200; vectorDims++) {
-            final FloatVector v1 = generateFixedVector(vectorDims, -0.7f);
-            final FloatVector v2 = v1.plus(generateFixedVector(vectorDims, 0.001f));
-            final FloatVector v3 = v2.minus(generateFixedVector(vectorDims, 0.1f));
-            final FloatVector v4 = v3.minus(generateFixedVector(vectorDims, 0.001f));
-            final FloatVector queryVector = v4.minus(generateFixedVector(vectorDims, 0.001f));
+            // Generate a random vector, normalise it, and then generate another one "close" to it
+            final FloatVector v1 = generateRandomVector(vectorDims, RANDOM).normalize();
+            final FloatVector v2 = v1.plus(generateFixedVector(vectorDims, 0.001f)).normalize();
+            // Generate another vector further away, another close to that, and a final query vector close to that
+            final FloatVector v3 = v2.minus(generateFixedVector(vectorDims, 0.1f)).normalize();
+            final FloatVector v4 = v3.minus(generateFixedVector(vectorDims, 0.001f)).normalize();
+            final FloatVector queryVector = v4.minus(generateFixedVector(vectorDims, 0.001f)).normalize();
             final Map<String, Integer> histogram = new HashMap<>();
             for (int run = 0; run < 1000; run++) {
-                // Test with a lot of buckets
                 final NearestVectorStore store = new NearestVectorStore(Map.of(Integer.MAX_VALUE, (byte)8));
                 store.add(v1);
                 store.add(v2);
@@ -127,7 +128,7 @@ class NearestVectorStoreTest {
     }
 
     @Test
-    void testDynamicUniversePowerChange() {
+    void testBucketSizeExponentChange() {
         assertThat(store.getBucketSizeExponent()).isEqualTo(LOWER_SECTION_BITS);
 
         // Add vectors to reach the threshold for bucket power increase
