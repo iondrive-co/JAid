@@ -1,4 +1,4 @@
-package jaid.file;
+package jaid.os;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -12,7 +12,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class AudioFileUtil {
+
+/**
+ * Note that java audio libraries do not support mp3, you will need to add library:
+ * implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
+ */
+public class AudioUtil {
 
     public static byte[] normalizeAudio(final String filePath) throws UnsupportedAudioFileException, IOException {
         final File file = new File(filePath);

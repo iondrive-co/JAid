@@ -1,4 +1,4 @@
-package jaid.file;
+package jaid.os;
 
 import org.junit.jupiter.api.Test;
 
@@ -7,10 +7,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-import static jaid.file.AudioFileUtil.normalizeAudio;
+import static jaid.os.AudioUtil.normalizeAudio;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class AudioFileUtilTest {
+class AudioUtilTest {
 
     @Test
     void testNormalizeAudio() {

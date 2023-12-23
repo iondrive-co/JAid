@@ -1,9 +1,8 @@
 /*
  * (c)
  */
-package jaid;
+package jaid.number;
 
-import jaid.number.GeometricRandom;
 import org.junit.jupiter.api.Test;
 
 import java.util.NavigableMap;

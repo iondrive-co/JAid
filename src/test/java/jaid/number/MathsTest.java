@@ -1,4 +1,4 @@
-package jaid;
+package jaid.number;
 
 import org.junit.jupiter.api.Test;
 

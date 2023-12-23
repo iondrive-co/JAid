@@ -1,4 +1,4 @@
-package jaid.file;
+package jaid.os;
 
 import com.google.common.base.Throwables;
 
