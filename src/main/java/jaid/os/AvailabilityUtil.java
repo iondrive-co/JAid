@@ -6,15 +6,17 @@ import java.util.Optional;
 
 /**
  * Finds the best available node from a list, given a resource that is needed and present in some quantity on each.
- * A potential improvement would be to use resource bands, since we are usually interested in secondary resources more
- * than a tiny difference in the primary.
+ * Best is defined as being in the BAND_PERCENTAGE nodes that would have the highest availability of that resource once
+ * the new usage is taken into account, and having the most availability of other resources of nodes in that band.
  */
 public class AvailabilityUtil {
+
+    private static final double BAND_PERCENTAGE = 5.0;
 
     public static Optional<Node> findMostSuitableNode(final List<Node> nodes, final Resource newResource) {
         return nodes.stream()
                 .filter(node -> canAccommodateResource(node, newResource))
-                .max(Comparator.comparing((Node node) -> resourceAvailability(node, newResource.type()))
+                .max(Comparator.comparing((Node node) -> resourceAvailability(node, newResource))
                         .thenComparing(AvailabilityUtil::sumOtherResourceAvailability));
     }
 
@@ -23,10 +25,10 @@ public class AvailabilityUtil {
                 nodeResource.type().equals(targetResource.type()) && nodeResource.amount() >= targetResource.amount());
     }
 
-    private static double resourceAvailability(final Node node, final String resourceType) {
+    private static double resourceAvailability(final Node node, final Resource newResource) {
         return node.resources().stream()
-                .filter(resource -> resource.type().equals(resourceType))
-                .mapToDouble(Resource::amount)
+                .filter(resource -> resource.type().equals(newResource.type()))
+                .mapToDouble(resource -> (int) ((resource.amount() + newResource.amount()) / BAND_PERCENTAGE))
                 .max()
                 .orElse(0);
     }
