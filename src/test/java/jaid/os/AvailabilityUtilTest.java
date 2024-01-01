@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
-import static jaid.os.AvailabilityUtil.findMostSuitableNode;
+import static jaid.os.AvailabilityUtil.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AvailabilityUtilTest {
@@ -13,25 +13,30 @@ class AvailabilityUtilTest {
     @Test
     public void testFindMostSuitableNode() {
         List<Node> nodes = List.of(
-                new Node("Node1", List.of(new Resource("CPU", 50), new Resource("Disk", 500))),
-                new Node("Node2", List.of(new Resource("CPU", 20), new Resource("Disk", 800))),
-                new Node("Node3", List.of(new Resource("CPU", 52), new Resource("Disk", 300))),
-                new Node("Node4", List.of(new Resource("Memory", 64), new Resource("Disk", 600)))
+                new Node("Node1", List.of(new Capacity("CPU", 50), new Capacity("Disk", 500))),
+                new Node("Node2", List.of(new Capacity("CPU", 20), new Capacity("Disk", 800))),
+                new Node("Node3", List.of(new Capacity("CPU", 52), new Capacity("Disk", 300))),
+                new Node("Node4", List.of(new Capacity("Memory", 64), new Capacity("Disk", 600)))
         );
 
-        Resource accommodatableResource = new Resource("Disk", 600);
-        Optional<Node> suitableNode = findMostSuitableNode(nodes, accommodatableResource);
+        Capacity accommodatableCapacity = new Capacity("Disk", 600);
+        Optional<Node> suitableNode = builder().build().findMostSuitableNode(nodes, accommodatableCapacity);
         assertThat(suitableNode).isPresent();
         // Node 2 has the most disk available
         assertThat(suitableNode.get().name()).isEqualTo("Node2");
 
-        Resource unaccommodatableResource = new Resource("Disk", 1000);
-        Optional<Node> unsuitableNode = findMostSuitableNode(nodes, unaccommodatableResource);
+        Capacity unaccommodatableCapacity = new Capacity("Disk", 1000);
+        Optional<Node> unsuitableNode = builder().build().findMostSuitableNode(nodes, unaccommodatableCapacity);
         assertThat(unsuitableNode).isEmpty();
 
-        // Node 3 has slightly more CPU but it is within the band, so tiebreak using Disk
-        suitableNode = findMostSuitableNode(nodes, new Resource("CPU", 1));
+        // Node 3 has slightly more CPU but it is within the level, so tiebreak using Disk
+        suitableNode = builder().build().findMostSuitableNode(nodes, new Capacity("CPU", 1));
         assertThat(suitableNode).isPresent();
         assertThat(suitableNode.get().name()).isEqualTo("Node1");
+
+        // However if we use enough levels then it will be in a different level with no need to tiebreak
+        suitableNode = builder().numLevels(100).build().findMostSuitableNode(nodes, new Capacity("CPU", 1));
+        assertThat(suitableNode).isPresent();
+        assertThat(suitableNode.get().name()).isEqualTo("Node3");
     }
 }
