@@ -5,12 +5,16 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Finds the best available node from a list, given a resource that is needed and present in some quantity on each.
- * Best is defined as being in the NUM_LEVELS level with the highest availability of that resource (once
+ * Finds the best available node from a list, given a capacity of some resource that is needed and present on each.
+ * Best is defined as being in {@link #numLevels level} with the highest availability of that resource (once
  * the new usage is taken into account), and having the most availability of other resources of nodes in that band.
  */
 public class AvailabilityUtil {
 
+    /**
+     * Split the usage of the desired resource into this many levels. Usages on the same level will be considered
+     * equal, and will be tie-broken by using availability of other resources.
+     */
     private final double numLevels;
 
     private AvailabilityUtil(double numLevels) {
@@ -29,7 +33,7 @@ public class AvailabilityUtil {
                 nodeCapacity.resource().equals(targetCapacity.resource()) && nodeCapacity.level() >= targetCapacity.level());
     }
 
-    private double resourceAvailability(final Node node, final Capacity newCapacity) {
+    double resourceAvailability(final Node node, final Capacity newCapacity) {
         return node.capacities().stream()
                 .filter(capacity -> capacity.resource().equals(newCapacity.resource()))
                 .mapToDouble(capacity -> (int) ((capacity.level() + newCapacity.level()) / (100 / numLevels)))

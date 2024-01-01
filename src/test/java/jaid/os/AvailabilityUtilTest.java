@@ -2,11 +2,13 @@ package jaid.os;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static jaid.os.AvailabilityUtil.builder;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 class AvailabilityUtilTest {
 
@@ -38,5 +40,21 @@ class AvailabilityUtilTest {
         suitableNode = builder().numLevels(100).build().findMostSuitableNode(nodes, new Capacity("CPU", 1));
         assertThat(suitableNode).isPresent();
         assertThat(suitableNode.get().name()).isEqualTo("Node3");
+    }
+
+    @Test
+    public void testResourceAvailabilityWithDifferentNumLevels() {
+        Capacity capacity1 = new Capacity("ResourceA", 50);
+        Capacity capacity2 = new Capacity("ResourceA", 30);
+        Node node = new Node("TestNode", Arrays.asList(capacity1, capacity2));
+        for (double numLevels = 1; numLevels <= 10; numLevels++) {
+            AvailabilityUtil util = AvailabilityUtil.builder().numLevels(numLevels).build();
+            double availability = util.resourceAvailability(node, new Capacity("ResourceA", 30));
+            double divisor = 100 / numLevels;
+            double expectedForCapacity1 = (int)((50 + 30) / divisor);
+            double expectedForCapacity2 = (int)((30 + 30) / divisor);
+            double expected = Math.max(expectedForCapacity1, expectedForCapacity2);
+            assertEquals("Failed at numLevels=" + numLevels, expected, availability, 0.01);
+        }
     }
 }
