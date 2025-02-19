@@ -1,7 +1,7 @@
 package jaid.number;
 
-import jaid.collection.DoubleVector;
-import jaid.collection.FloatVector;
+import jaid.collection.DoublesVector;
+import jaid.collection.FloatsVector;
 import jaid.collection.IVector;
 import org.junit.After;
 import org.junit.jupiter.api.Assertions;
@@ -40,10 +40,10 @@ class NearestVectorStoreTest {
 
     @Test
     void testGetIdentical() {
-        FloatVector v1 = new FloatVector(new float[]{-0.1f, -0.2f, 0.3f}).normalize();
-        FloatVector v2 = new FloatVector(new float[]{-0.4f, 0.5f, -0.6f}).normalize();
-        FloatVector v3 = new FloatVector(new float[]{-0.7f, -0.8f, 0.9f}).normalize();
-        FloatVector queryVector = new FloatVector(new float[]{-0.1f, -0.2f, 0.3f}).normalize();
+        FloatsVector v1 = new FloatsVector(new float[]{-0.1f, -0.2f, 0.3f}).normalize();
+        FloatsVector v2 = new FloatsVector(new float[]{-0.4f, 0.5f, -0.6f}).normalize();
+        FloatsVector v3 = new FloatsVector(new float[]{-0.7f, -0.8f, 0.9f}).normalize();
+        FloatsVector queryVector = new FloatsVector(new float[]{-0.1f, -0.2f, 0.3f}).normalize();
 
         store.add(v1);
         store.add(v2);
@@ -58,10 +58,10 @@ class NearestVectorStoreTest {
 
     @Test
     void testAdjacentVectorsReturned() {
-        FloatVector v1 = new FloatVector(new float[]{0.1f, 0.2f, 0.3f}).normalize();
-        FloatVector v2 = new FloatVector(new float[]{0.6f, 0.7f, 0.8f}).normalize();
-        FloatVector v3 = v2.plus(new FloatVector(new float[]{0.001f, 0.001f, 0.001f})).normalize();
-        FloatVector queryVector = v2.plus(new FloatVector(new float[]{0.0005f, 0.0005f, 0.0005f})).normalize();
+        FloatsVector v1 = new FloatsVector(new float[]{0.1f, 0.2f, 0.3f}).normalize();
+        FloatsVector v2 = new FloatsVector(new float[]{0.6f, 0.7f, 0.8f}).normalize();
+        FloatsVector v3 = v2.plus(new FloatsVector(new float[]{0.001f, 0.001f, 0.001f})).normalize();
+        FloatsVector queryVector = v2.plus(new FloatsVector(new float[]{0.0005f, 0.0005f, 0.0005f})).normalize();
 
         store.add(v1);
         store.add(v2);
@@ -79,12 +79,12 @@ class NearestVectorStoreTest {
     void queryDistribution() {
         for (int vectorDims = 3; vectorDims < 200; vectorDims++) {
             // Generate a random vector, normalise it, and then generate another one "close" to it
-            final FloatVector v1 = generateRandomVector(vectorDims, RANDOM).normalize();
-            final FloatVector v2 = v1.plus(generateFixedVector(vectorDims, 0.001f)).normalize();
+            final FloatsVector v1 = generateRandomVector(vectorDims, RANDOM).normalize();
+            final FloatsVector v2 = v1.plus(generateFixedVector(vectorDims, 0.001f)).normalize();
             // Generate another vector further away, another close to that, and a final query vector close to that
-            final FloatVector v3 = v2.minus(generateFixedVector(vectorDims, 0.1f)).normalize();
-            final FloatVector v4 = v3.minus(generateFixedVector(vectorDims, 0.001f)).normalize();
-            final FloatVector queryVector = v4.minus(generateFixedVector(vectorDims, 0.001f)).normalize();
+            final FloatsVector v3 = v2.minus(generateFixedVector(vectorDims, 0.1f)).normalize();
+            final FloatsVector v4 = v3.minus(generateFixedVector(vectorDims, 0.001f)).normalize();
+            final FloatsVector queryVector = v4.minus(generateFixedVector(vectorDims, 0.001f)).normalize();
             final Map<String, Integer> histogram = new HashMap<>();
             for (int run = 0; run < 1000; run++) {
                 final NearestVectorStore store = new NearestVectorStore(Map.of(Integer.MAX_VALUE, (byte)8));
@@ -109,7 +109,7 @@ class NearestVectorStoreTest {
 
     @Test
     public void addAndRemove() {
-        IVector vector = new DoubleVector(new double[]{-1, 0, 0.5, 2});
+        IVector vector = new DoublesVector(new double[]{-1, 0, 0.5, 2});
         NearestVectorStore store = new NearestVectorStore();
 
         store.add(vector);
@@ -137,7 +137,7 @@ class NearestVectorStoreTest {
         }
         assertThat(store.getBucketSizeExponent()).isEqualTo(MIDDLE_SECTION_BITS);
 
-        FloatVector queryVector = generateRandomVector(10, RANDOM);
+        FloatsVector queryVector = generateRandomVector(10, RANDOM);
         store.add(queryVector);
         List<IVector> results = store.query(queryVector, 1);
         assertThat(results).contains(queryVector);

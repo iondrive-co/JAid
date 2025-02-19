@@ -1,14 +1,17 @@
 package jaid.collection;
 
 import com.google.common.base.Preconditions;
+import jdk.incubator.vector.FloatVector;
+import jdk.incubator.vector.VectorOperators;
 
 import java.util.Arrays;
 
 import static jaid.number.HashingUtil.compressHash;
+import static jdk.incubator.vector.FloatVector.SPECIES_256;
 
-public record FloatVector(float[] contents) implements IVector {
+public record FloatsVector(float[] contents) implements IVector {
 
-    public FloatVector(float[] contents) {
+    public FloatsVector(float[] contents) {
         this.contents = Preconditions.checkNotNull(contents);
     }
 
@@ -30,25 +33,45 @@ public record FloatVector(float[] contents) implements IVector {
 
     @Override
     public double dotProduct(final IVector comparedTo) {
-        if (!(comparedTo instanceof FloatVector) || contents.length != ((FloatVector) comparedTo).contents.length) {
+        if (!(comparedTo instanceof FloatsVector) || contents.length != ((FloatsVector) comparedTo).contents.length) {
             throw new IllegalArgumentException();
         }
-        float sum = 0;
-        for (int i = 0; i < contents.length; ++i) {
-            sum = Math.fma(contents[i], ((FloatVector) comparedTo).contents[i], sum);
+        float[] left = contents;
+        float[] right = ((FloatsVector) comparedTo).contents;
+        int size = left.length;
+        int width = SPECIES_256.length();
+        // Handle case where array length is not a multiple of (width * 4)
+        int vectorizableLimit = size - (size % (width * 4));
+        // Multiple accumulators for better instruction-level parallelism
+        var sum1 = FloatVector.zero(SPECIES_256);
+        var sum2 = FloatVector.zero(SPECIES_256);
+        var sum3 = FloatVector.zero(SPECIES_256);
+        var sum4 = FloatVector.zero(SPECIES_256);
+        // Main vectorized loop with 4x unrolling
+        for (int i = 0; i < vectorizableLimit; i += width * 4) {
+            sum1 = FloatVector.fromArray(SPECIES_256, left, i)
+                    .fma(FloatVector.fromArray(SPECIES_256, right, i), sum1);
+            sum2 = FloatVector.fromArray(SPECIES_256, left, i + width)
+                    .fma(FloatVector.fromArray(SPECIES_256, right, i + width), sum2);
+            sum3 = FloatVector.fromArray(SPECIES_256, left, i + width * 2)
+                    .fma(FloatVector.fromArray(SPECIES_256, right, i + width * 2), sum3);
+            sum4 = FloatVector.fromArray(SPECIES_256, left, i + width * 3)
+                    .fma(FloatVector.fromArray(SPECIES_256, right, i + width * 3), sum4);
         }
-        return sum;
-        // TODO when panama is no longer incubating, the following should provide a large speedup
-//        var sum = YMM_FLOAT.zero();
-//        for (int i = 0; i < size; i += YMM_FLOAT.length()) {
-//            var l = YMM_FLOAT.fromArray(left, i);
-//            var r = YMM_FLOAT.fromArray(right, i);
-//            sum = l.fma(r, sum);
-//        }
-//        return sum.addAll();
+        // Handle remaining elements
+        float remainderSum = 0;
+        for (int i = vectorizableLimit; i < size; i++) {
+            remainderSum += left[i] * right[i];
+        }
+        // Combine all sums
+        return sum1.reduceLanes(VectorOperators.ADD) +
+                sum2.reduceLanes(VectorOperators.ADD) +
+                sum3.reduceLanes(VectorOperators.ADD) +
+                sum4.reduceLanes(VectorOperators.ADD) +
+                remainderSum;
     }
 
-    public float meanSquaredError(final FloatVector comparedTo) {
+    public float meanSquaredError(final FloatsVector comparedTo) {
         return distance(contents, comparedTo.contents);
     }
 
@@ -57,13 +80,13 @@ public record FloatVector(float[] contents) implements IVector {
     public <T extends IVector> T minus(T operand) {
         final float[] newContents = new float[contents.length];
         for (int i = 0; i < contents.length; i++) {
-            newContents[i] = contents[i] - ((FloatVector)operand).contents[i];
+            newContents[i] = contents[i] - ((FloatsVector)operand).contents[i];
         }
-        return (T)new FloatVector(newContents);
+        return (T)new FloatsVector(newContents);
     }
 
     @Override
-    public FloatVector normalize() {
+    public FloatsVector normalize() {
         float magnitude = (float)Math.sqrt(this.dotProduct(this));
         if (magnitude == 0) return this; // avoid division by zero for a zero vector
 
@@ -71,7 +94,7 @@ public record FloatVector(float[] contents) implements IVector {
         for (int i = 0; i < this.contents.length; i++) {
             normalizedContents[i] = this.contents[i] / magnitude;
         }
-        return new FloatVector(normalizedContents);
+        return new FloatsVector(normalizedContents);
     }
 
     @Override
@@ -79,9 +102,9 @@ public record FloatVector(float[] contents) implements IVector {
     public <T extends IVector> T plus(T operand) {
         final float[] newContents = new float[contents.length];
         for (int i = 0; i < contents.length; i++) {
-            newContents[i] = contents[i] + ((FloatVector)operand).contents[i];
+            newContents[i] = contents[i] + ((FloatsVector)operand).contents[i];
         }
-        return (T)new FloatVector(newContents);
+        return (T)new FloatsVector(newContents);
     }
 
     @Override
@@ -115,7 +138,7 @@ public record FloatVector(float[] contents) implements IVector {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        FloatVector that = (FloatVector) o;
+        FloatsVector that = (FloatsVector) o;
         return Arrays.equals(contents, that.contents);
     }
 

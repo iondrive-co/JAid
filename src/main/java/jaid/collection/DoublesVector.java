@@ -1,14 +1,17 @@
 package jaid.collection;
 
 import com.google.common.base.Preconditions;
+import jdk.incubator.vector.DoubleVector;
+import jdk.incubator.vector.VectorOperators;
 
 import java.util.Arrays;
 
 import static jaid.number.HashingUtil.compressHash;
+import static jdk.incubator.vector.DoubleVector.SPECIES_256;
 
-public record DoubleVector(double[] contents) implements IVector {
+public record DoublesVector(double[] contents) implements IVector {
 
-    public DoubleVector(double[] contents) {
+    public DoublesVector(double[] contents) {
         this.contents = Preconditions.checkNotNull(contents);
     }
 
@@ -30,25 +33,45 @@ public record DoubleVector(double[] contents) implements IVector {
 
     @Override
     public double dotProduct(final IVector comparedTo) {
-        if (!(comparedTo instanceof DoubleVector) || contents.length != ((DoubleVector) comparedTo).contents.length) {
+        if (!(comparedTo instanceof DoublesVector) || contents.length != ((DoublesVector) comparedTo).contents.length) {
             throw new IllegalArgumentException();
         }
-        double sum = 0;
-        for (int i = 0; i < contents.length; ++i) {
-            sum = Math.fma(contents[i], ((DoubleVector) comparedTo).contents[i], sum);
+        double[] left = contents;
+        double[] right = ((DoublesVector) comparedTo).contents;
+        int size = left.length;
+        int width = SPECIES_256.length();
+        // Handle case where array length is not a multiple of (width * 4)
+        int vectorizableLimit = size - (size % (width * 4));
+        // Multiple accumulators for better instruction-level parallelism
+        var sum1 = DoubleVector.zero(SPECIES_256);
+        var sum2 = DoubleVector.zero(SPECIES_256);
+        var sum3 = DoubleVector.zero(SPECIES_256);
+        var sum4 = DoubleVector.zero(SPECIES_256);
+        // Main vectorized loop with 4x unrolling
+        for (int i = 0; i < vectorizableLimit; i += width * 4) {
+            sum1 = DoubleVector.fromArray(SPECIES_256, left, i)
+                    .fma(DoubleVector.fromArray(SPECIES_256, right, i), sum1);
+            sum2 = DoubleVector.fromArray(SPECIES_256, left, i + width)
+                    .fma(DoubleVector.fromArray(SPECIES_256, right, i + width), sum2);
+            sum3 = DoubleVector.fromArray(SPECIES_256, left, i + width * 2)
+                    .fma(DoubleVector.fromArray(SPECIES_256, right, i + width * 2), sum3);
+            sum4 = DoubleVector.fromArray(SPECIES_256, left, i + width * 3)
+                    .fma(DoubleVector.fromArray(SPECIES_256, right, i + width * 3), sum4);
         }
-        return sum;
-        // TODO when panama is no longer incubating, the following should provide a large speedup
-//        var sum = YMM_DOUBLE.zero();
-//        for (int i = 0; i < size; i += YMM_DOUBLE.length()) {
-//            var l = YMM_DOUBLE.fromArray(left, i);
-//            var r = YMM_DOUBLE.fromArray(right, i);
-//            sum = l.fma(r, sum);
-//        }
-//        return sum.addAll();
+        // Handle remaining elements
+        double remainderSum = 0;
+        for (int i = vectorizableLimit; i < size; i++) {
+            remainderSum += left[i] * right[i];
+        }
+        // Combine all sums
+        return sum1.reduceLanes(VectorOperators.ADD) +
+                sum2.reduceLanes(VectorOperators.ADD) +
+                sum3.reduceLanes(VectorOperators.ADD) +
+                sum4.reduceLanes(VectorOperators.ADD) +
+                remainderSum;
     }
 
-    public double meanSquaredError(final DoubleVector comparedTo) {
+    public double meanSquaredError(final DoublesVector comparedTo) {
         return distance(contents, comparedTo.contents);
     }
 
@@ -57,13 +80,13 @@ public record DoubleVector(double[] contents) implements IVector {
     public <T extends IVector> T minus(T operand) {
         final double[] newContents = new double[contents.length];
         for (int i = 0; i < contents.length; i++) {
-            newContents[i] = contents[i] - ((DoubleVector)operand).contents[i];
+            newContents[i] = contents[i] - ((DoublesVector)operand).contents[i];
         }
-        return (T)new DoubleVector(newContents);
+        return (T)new DoublesVector(newContents);
     }
 
     @Override
-    public DoubleVector normalize() {
+    public DoublesVector normalize() {
         double magnitude = Math.sqrt(this.dotProduct(this));
         if (magnitude == 0) return this; // avoid division by zero for a zero vector
 
@@ -71,7 +94,7 @@ public record DoubleVector(double[] contents) implements IVector {
         for (int i = 0; i < this.contents.length; i++) {
             normalizedContents[i] = this.contents[i] / magnitude;
         }
-        return new DoubleVector(normalizedContents);
+        return new DoublesVector(normalizedContents);
     }
 
     @Override
@@ -79,9 +102,9 @@ public record DoubleVector(double[] contents) implements IVector {
     public <T extends IVector> T plus(T operand) {
         final double[] newContents = new double[contents.length];
         for (int i = 0; i < contents.length; i++) {
-            newContents[i] = contents[i] + ((DoubleVector)operand).contents[i];
+            newContents[i] = contents[i] + ((DoublesVector)operand).contents[i];
         }
-        return (T)new DoubleVector(newContents);
+        return (T)new DoublesVector(newContents);
     }
 
     @Override
@@ -115,7 +138,7 @@ public record DoubleVector(double[] contents) implements IVector {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        DoubleVector that = (DoubleVector) o;
+        DoublesVector that = (DoublesVector) o;
         return Arrays.equals(contents, that.contents);
     }
 

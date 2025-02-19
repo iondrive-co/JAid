@@ -17,10 +17,10 @@ class BoundedPriorityQueueTest {
     @Test
     public void topK() {
         BoundedPriorityQueue bpq = new BoundedPriorityQueue(2);
-        FloatVector v1 = new FloatVector(new float[] {1, 2, 3});
-        FloatVector v2 = new FloatVector(new float[] {4, 5, 6});
-        FloatVector v3 = new FloatVector(new float[] {7, 8, 9});
-        FloatVector queryVector = new FloatVector(new float[] {1, 0, 0});
+        FloatsVector v1 = new FloatsVector(new float[] {1, 2, 3});
+        FloatsVector v2 = new FloatsVector(new float[] {4, 5, 6});
+        FloatsVector v3 = new FloatsVector(new float[] {7, 8, 9});
+        FloatsVector queryVector = new FloatsVector(new float[] {1, 0, 0});
 
         double dot1 = v1.dotProduct(queryVector);
         double dot2 = v2.dotProduct(queryVector);
@@ -38,7 +38,7 @@ class BoundedPriorityQueueTest {
     @Test
     public void identicalVectorFound() {
         BoundedPriorityQueue bpq = new BoundedPriorityQueue(3);
-        FloatVector v = randomVector(3, -1, 1);
+        FloatsVector v = randomVector(3, -1, 1);
         double dotProduct = v.dotProduct(v);
 
         bpq.add(v, dotProduct);
@@ -51,9 +51,9 @@ class BoundedPriorityQueueTest {
     @Test
     public void negativeDotProducts() {
         BoundedPriorityQueue bpq = new BoundedPriorityQueue(3);
-        FloatVector v1 = new FloatVector(new float[] {-0.1f, -0.2f, -0.3f});
-        FloatVector v2 = new FloatVector(new float[] {-0.4f, -0.5f, -0.6f});
-        FloatVector queryVector = new FloatVector(new float[] {1f, 1f, 1f});
+        FloatsVector v1 = new FloatsVector(new float[] {-0.1f, -0.2f, -0.3f});
+        FloatsVector v2 = new FloatsVector(new float[] {-0.4f, -0.5f, -0.6f});
+        FloatsVector queryVector = new FloatsVector(new float[] {1f, 1f, 1f});
 
         bpq.add(v1, v1.dotProduct(queryVector));
         bpq.add(v2, v2.dotProduct(queryVector));
@@ -65,11 +65,11 @@ class BoundedPriorityQueueTest {
     @Test
     public void fractionalNumbers() {
         BoundedPriorityQueue bpq = new BoundedPriorityQueue(2);
-        FloatVector v1 = new FloatVector(new float[] {0.5f, 0.25f, 0.125f});
-        FloatVector v2 = new FloatVector(new float[] {0.6f, 0.3f, 0.9f});
+        FloatsVector v1 = new FloatsVector(new float[] {0.5f, 0.25f, 0.125f});
+        FloatsVector v2 = new FloatsVector(new float[] {0.6f, 0.3f, 0.9f});
 
-        bpq.add(v1, v1.dotProduct(new FloatVector(new float[] {2f, 2f, 2f})));
-        bpq.add(v2, v2.dotProduct(new FloatVector(new float[] {2f, 2f, 2f})));
+        bpq.add(v1, v1.dotProduct(new FloatsVector(new float[] {2f, 2f, 2f})));
+        bpq.add(v2, v2.dotProduct(new FloatsVector(new float[] {2f, 2f, 2f})));
 
         List<IVector> results = bpq.toList();
         assertTrue(results.size() <= 2 && results.contains(v2));
@@ -78,20 +78,20 @@ class BoundedPriorityQueueTest {
     @Test
     public void differentDimensions() {
         BoundedPriorityQueue bpq = new BoundedPriorityQueue(3);
-        FloatVector v1 = new FloatVector(new float[] {0.1f, 0.2f});
-        FloatVector v2 = new FloatVector(new float[] {0.1f, 0.2f, 0.3f});
-        FloatVector queryVector = new FloatVector(new float[] {1f, 1f});
+        FloatsVector v1 = new FloatsVector(new float[] {0.1f, 0.2f});
+        FloatsVector v2 = new FloatsVector(new float[] {0.1f, 0.2f, 0.3f});
+        FloatsVector queryVector = new FloatsVector(new float[] {1f, 1f});
 
         bpq.add(v1, v1.dotProduct(queryVector));
         // Dot product does not make sense for different dimensions
         assertThrows(IllegalArgumentException.class, () -> bpq.add(v2, v2.dotProduct(queryVector)));
     }
 
-    private FloatVector randomVector(int dimensions, float rangeStart, float rangeEnd) {
+    private FloatsVector randomVector(int dimensions, float rangeStart, float rangeEnd) {
         float[] values = new float[dimensions];
         for (int i = 0; i < dimensions; i++) {
             values[i] = rangeStart + (rangeEnd - rangeStart) * RANDOM.nextFloat();
         }
-        return new FloatVector(values);
+        return new FloatsVector(values);
     }
 }
