@@ -21,6 +21,7 @@ import java.util.stream.IntStream;
 
 /**
  * Any results in the comments are from an AMD Ryzen 7 6800H laptop.
+ * Run in gradle with ./gradlew jmh
  */
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class IntSkipListPerformanceTest {

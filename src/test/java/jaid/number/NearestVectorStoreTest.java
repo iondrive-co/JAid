@@ -3,7 +3,7 @@ package jaid.number;
 import jaid.collection.DoublesVector;
 import jaid.collection.FloatsVector;
 import jaid.collection.IVector;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -15,9 +15,6 @@ import java.util.Random;
 import static jaid.collection.IVectorTestUtil.generateFixedVector;
 import static jaid.collection.IVectorTestUtil.generateRandomVector;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NearestVectorStoreTest {
@@ -33,8 +30,8 @@ class NearestVectorStoreTest {
 
     private final NearestVectorStore store = new NearestVectorStore(THRESHOLDS);
 
-    @After
-    void after() {
+    @AfterEach
+    public void after() {
         store.clear();
     }
 
@@ -52,8 +49,8 @@ class NearestVectorStoreTest {
         List<IVector> results = store.query(queryVector, 1);
 
         // Check if the identical vector is returned
-        assertEquals(1, results.size());
-        assertSame(v1, results.get(0));
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertSame(v1, results.get(0));
     }
 
     @Test
@@ -121,10 +118,10 @@ class NearestVectorStoreTest {
         assertTrue(store.remove(vector));
 
         // Verify the vector is no longer in the store
-        assertFalse(store.query(vector, 1).contains(vector));
+        Assertions.assertFalse(store.query(vector, 1).contains(vector));
 
         // Ensure removal returns false if the vector is not found
-        assertFalse(store.remove(vector));
+        Assertions.assertFalse(store.remove(vector));
     }
 
     @Test
