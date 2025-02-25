@@ -36,6 +36,8 @@ public record FloatsVector(float[] contents) implements IVector {
         if (!(comparedTo instanceof FloatsVector) || contents.length != ((FloatsVector) comparedTo).contents.length) {
             throw new IllegalArgumentException();
         }
+        // Use unrolled vector calculation based on https://richardstartin.github.io/posts/vector-api-dot-product
+        // This is much faster for large vectors than a Math.fma intrinsic, see DoublesVectorPerformanceTest
         float[] left = contents;
         float[] right = ((FloatsVector) comparedTo).contents;
         int size = left.length;

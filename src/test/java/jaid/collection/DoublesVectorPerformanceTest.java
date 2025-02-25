@@ -30,14 +30,34 @@ public class DoublesVectorPerformanceTest {
         final int[] vectorSizes = new int[]{8, 65, 256, 768, 2048, 16384};
         final DoublesVector[] normalisedFirst = new DoublesVector[vectorSizes.length];
         final DoublesVector[] normalisedSecond = new DoublesVector[vectorSizes.length];
+        final FmaIntrinsicDoublesVector[] normalisedFirstFma = new FmaIntrinsicDoublesVector[vectorSizes.length];
+        final FmaIntrinsicDoublesVector[] normalisedSecondFma = new FmaIntrinsicDoublesVector[vectorSizes.length];
+        final MultipleDoublesVector[] normalisedFirstMultiply = new MultipleDoublesVector[vectorSizes.length];
+        final MultipleDoublesVector[] normalisedSecondMultiply = new MultipleDoublesVector[vectorSizes.length];
 
         @Setup(Level.Trial)
         public void trialSetup() {
             for (int i = 0; i < vectorSizes.length; i++) {
                 normalisedFirst[i] = new DoublesVector(generate(() -> random.nextDouble()).limit(vectorSizes[i]).toArray());
                 normalisedSecond[i] = new DoublesVector(generate(() -> random.nextDouble()).limit(vectorSizes[i]).toArray());
+                normalisedFirstFma[i] = new FmaIntrinsicDoublesVector(generate(() -> random.nextDouble()).limit(vectorSizes[i]).toArray());
+                normalisedSecondFma[i] = new FmaIntrinsicDoublesVector(generate(() -> random.nextDouble()).limit(vectorSizes[i]).toArray());
+                normalisedFirstMultiply[i] = new MultipleDoublesVector(generate(() -> random.nextDouble()).limit(vectorSizes[i]).toArray());
+                normalisedSecondMultiply[i] = new MultipleDoublesVector(generate(() -> random.nextDouble()).limit(vectorSizes[i]).toArray());
             }
         }
+    }
+
+    /**
+     * Result "jaid.collection.DoublesVectorPerformanceTest.normalisedDotProductSmall":
+     *   5.698 ´┐¢(99.9%) 0.171 ns/op [Average]
+     *   (min, avg, max) = (5.477, 5.698, 5.896), stdev = 0.160
+     *   CI (99.9%): [5.527, 5.870] (assumes normal distribution)
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void normalisedDotProductSmall(TestState testState, Blackhole resultConsumer) {
+        resultConsumer.consume(testState.normalisedFirst[0].dotProduct(testState.normalisedSecond[0]));
     }
 
     /**
@@ -51,6 +71,60 @@ public class DoublesVectorPerformanceTest {
     public void normalisedDotProductAll(TestState testState, Blackhole resultConsumer) {
         for (int i = 0; i < testState.vectorSizes.length; i++) {
             resultConsumer.consume(testState.normalisedFirst[i].dotProduct(testState.normalisedSecond[i]));
+
+        }
+    }
+
+    /**
+     * Result "jaid.collection.DoublesVectorPerformanceTest.normalisedDotProductSmall":
+     *   4.614 ´┐¢(99.9%) 0.021 ns/op [Average]
+     *   (min, avg, max) = (4.574, 4.614, 4.649), stdev = 0.020
+     *   CI (99.9%): [4.593, 4.636] (assumes normal distribution)
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void normalisedFmaDotProductSmall(TestState testState, Blackhole resultConsumer) {
+        resultConsumer.consume(testState.normalisedFirstFma[0].dotProduct(testState.normalisedSecondFma[0]));
+    }
+
+    /**
+     * Result "jaid.collection.DoublesVectorPerformanceTest.normalisedDotProductAll":
+     *   17437.131 ´┐¢(99.9%) 64.608 ns/op [Average]
+     *   (min, avg, max) = (17330.221, 17437.131, 17549.885), stdev = 60.435
+     *   CI (99.9%): [17372.522, 17501.739] (assumes normal distribution)
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void normalisedFmaDotProductAll(TestState testState, Blackhole resultConsumer) {
+        for (int i = 0; i < testState.vectorSizes.length; i++) {
+            resultConsumer.consume(testState.normalisedFirstFma[i].dotProduct(testState.normalisedSecondFma[i]));
+
+        }
+    }
+
+    /**
+     * Result "jaid.collection.DoublesVectorPerformanceTest.normalisedMultiplyDotProductSmall":
+     *   5.258 ´┐¢(99.9%) 0.424 ns/op [Average]
+     *   (min, avg, max) = (4.678, 5.258, 5.665), stdev = 0.397
+     *   CI (99.9%): [4.833, 5.682] (assumes normal distribution)
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void normalisedMultiplyDotProductSmall(TestState testState, Blackhole resultConsumer) {
+        resultConsumer.consume(testState.normalisedFirstMultiply[0].dotProduct(testState.normalisedSecondMultiply[0]));
+    }
+
+    /**
+     * Result "jaid.collection.DoublesVectorPerformanceTest.normalisedMultiplyDotProductAll":
+     *   13561.563 ´┐¢(99.9%) 247.475 ns/op [Average]
+     *   (min, avg, max) = (13177.615, 13561.563, 14023.692), stdev = 231.488
+     *   CI (99.9%): [13314.088, 13809.038] (assumes normal distribution)
+     */
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void normalisedMultiplyDotProductAll(TestState testState, Blackhole resultConsumer) {
+        for (int i = 0; i < testState.vectorSizes.length; i++) {
+            resultConsumer.consume(testState.normalisedFirstMultiply[i].dotProduct(testState.normalisedSecondMultiply[i]));
 
         }
     }

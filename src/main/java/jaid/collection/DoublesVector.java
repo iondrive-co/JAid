@@ -36,8 +36,8 @@ public record DoublesVector(double[] contents) implements IVector {
         if (!(comparedTo instanceof DoublesVector) || contents.length != ((DoublesVector) comparedTo).contents.length) {
             throw new IllegalArgumentException();
         }
-        // Use unrolled vector calculation
-        // For performance comparison to vectors, Math.fma intrinsic, and simple multiple, see DoublesVectorPerformanceTest
+        // Use unrolled vector calculation based on https://richardstartin.github.io/posts/vector-api-dot-product
+        // This is much faster for large vectors than a Math.fma intrinsic, see DoublesVectorPerformanceTest
         double[] left = contents;
         double[] right = ((DoublesVector) comparedTo).contents;
         int size = left.length;

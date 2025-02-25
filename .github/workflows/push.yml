@@ -22,4 +22,4 @@ jobs:
         with:
           arguments: build
       - name: Run JUnit tests
-        run: ./gradlew test
+        run: ./gradlew clean test
