@@ -1,6 +1,17 @@
 plugins {
     id 'java'
+    id 'maven-publish'
     id 'me.champeau.jmh' version '0.7.3'
+}
+
+group = 'com.github.iondrive-co'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
 jmh {
