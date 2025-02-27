@@ -17,8 +17,10 @@ public record DoublesVector(double[] contents) implements IVector {
 
     @Override
     public double angleBetween(final IVector other) {
+        // The dot product of two normalized vectors equals the cosine of the angle between them.
         double dotProduct = normalize().dotProduct(other.normalize());
-        // Clamp to valid domain for acos
+        // The clamp to [-1,1] ensures numerical stability since floating-point errors
+        // might occasionally produce values slightly outside the valid domain for acos.
         return Math.acos(Math.min(1.0, Math.max(-1.0, dotProduct)));
     }
 
@@ -135,7 +137,7 @@ public record DoublesVector(double[] contents) implements IVector {
     }
 
     @Override
-    public int simBucket(byte bits) {
+    public int getSimHashBucket(byte bits) {
         // Shortcut - if we want every hash to be the same, then don't compute anything
         if (bits == 0) {
             return 0;

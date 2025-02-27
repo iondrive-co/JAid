@@ -51,11 +51,11 @@ public class NearestVectorStore {
     public void add(final IVector vector) {
         size += 1;
         updateBuckets();
-        vectors.computeIfAbsent(vector.simBucket(bucketSizeExponent), k -> new ArrayList<>()).add(vector);
+        vectors.computeIfAbsent(vector.getSimHashBucket(bucketSizeExponent), k -> new ArrayList<>()).add(vector);
     }
 
     public boolean remove(final IVector vector) {
-        int simBucket = vector.simBucket(bucketSizeExponent);
+        int simBucket = vector.getSimHashBucket(bucketSizeExponent);
         List<IVector> vectorsAtHash = vectors.get(simBucket);
         if (vectorsAtHash != null) {
             boolean removed = vectorsAtHash.remove(vector);
@@ -73,7 +73,7 @@ public class NearestVectorStore {
     public List<IVector> query(final IVector queryVector, final int k) {
         // Sort results by their dot product, dropping any that are too low
         final BoundedPriorityQueue pq = new BoundedPriorityQueue(k);
-        vectors.getOrDefault(queryVector.simBucket(bucketSizeExponent), emptyList()).forEach(v -> pq.add(v, v.dotProduct(queryVector)));
+        vectors.getOrDefault(queryVector.getSimHashBucket(bucketSizeExponent), emptyList()).forEach(v -> pq.add(v, v.dotProduct(queryVector)));
         return pq.toList();
     }
 
@@ -105,7 +105,7 @@ public class NearestVectorStore {
             final Int2ReferenceMap<List<IVector>> newVectors = new Int2ReferenceArrayMap<>();
             for (final List<IVector> vectorList : vectors.values()) {
                 for (final IVector vector : vectorList) {
-                    newVectors.computeIfAbsent(vector.simBucket(bucketSizeExponent), k -> new ArrayList<>()).add(vector);
+                    newVectors.computeIfAbsent(vector.getSimHashBucket(bucketSizeExponent), k -> new ArrayList<>()).add(vector);
                 }
             }
             vectors.clear();

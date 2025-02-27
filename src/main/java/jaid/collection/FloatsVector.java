@@ -135,7 +135,7 @@ public record FloatsVector(float[] contents) implements IVector {
     }
 
     @Override
-    public int simBucket(byte bits) {
+    public int getSimHashBucket(byte bits) {
         // Shortcut - if we want every hash to be the same, then don't compute anything
         if (bits == 0) {
             return 0;
