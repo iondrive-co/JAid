@@ -15,20 +15,17 @@ public record FloatsVector(float[] contents) implements IVector {
         this.contents = Preconditions.checkNotNull(contents);
     }
 
-    /**
-     * Calculate the mean squared error.
-     * for vectors v1 and v2 of length I calculate
-     * MSE = 1/I * Sum[ ( v1_i - v2_i )^2 ]
-     */
-    public static float distance(final float[] vector1, final float[] vector2) {
-        if (vector1.length != vector2.length) {
-            throw new IllegalArgumentException();
-        }
-        float sum = 0;
-        for (int i = 0; i < vector1.length; i++) {
-            sum += Math.pow(vector1[i] - vector2[i], 2);
-        }
-        return (sum / vector1.length);
+    @Override
+    public double angleBetween(final IVector other) {
+        double dotProduct = normalize().dotProduct(other.normalize());
+        // Clamp to valid domain for acos
+        return Math.acos(Math.min(1.0, Math.max(-1.0, dotProduct)));
+    }
+
+    @Override
+    public <T extends IVector> double distance(final T other) {
+        // MSE * dimension = sum of squared differences
+        return Math.sqrt(meanSquaredError(other) * contents.length);
     }
 
     @Override
@@ -73,8 +70,26 @@ public record FloatsVector(float[] contents) implements IVector {
                 remainderSum;
     }
 
-    public float meanSquaredError(final FloatsVector comparedTo) {
-        return distance(contents, comparedTo.contents);
+    @Override
+    public double magnitude() {
+        double sum = 0;
+        for (int i = 0; i < contents.length; i++) {
+            sum += contents[i] * contents[i];
+        }
+        return Math.sqrt(sum);
+    }
+
+    @Override
+    public <T extends IVector> double meanSquaredError(final T other) {
+        if (!(other instanceof FloatsVector) || contents.length != ((FloatsVector)other).contents().length) {
+            throw new IllegalArgumentException("Vectors must have the same dimensions");
+        }
+        double sumSquaredDiff = 0;
+        for (int i = 0; i < contents.length; i++) {
+            double diff = contents[i] - ((FloatsVector)other).contents()[i];
+            sumSquaredDiff += diff * diff;
+        }
+        return sumSquaredDiff / contents.length;
     }
 
     @Override
@@ -105,6 +120,16 @@ public record FloatsVector(float[] contents) implements IVector {
         final float[] newContents = new float[contents.length];
         for (int i = 0; i < contents.length; i++) {
             newContents[i] = contents[i] + ((FloatsVector)operand).contents[i];
+        }
+        return (T)new FloatsVector(newContents);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends IVector> T scale(final float amount) {
+        final float[] newContents = new float[contents.length];
+        for (int i = 0; i < contents.length; i++) {
+            newContents[i] = contents[i] * amount;
         }
         return (T)new FloatsVector(newContents);
     }
